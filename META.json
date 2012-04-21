@@ -1,0 +1,48 @@
+{
+   "abstract" : "An interface to sharded key-value stores",
+   "author" : [
+      "Steffen Mueller <smueller@cpan.org>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Dist::Zilla version 4.300008, CPAN::Meta::Converter version 2.113640",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "ShardedKV",
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "6.30"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Algorithm::ConsistentHash::Ketama" : 0,
+            "Carp" : 0,
+            "DBD::mysql" : 0,
+            "DBI" : 0,
+            "Data::Dumper" : 0,
+            "JSON" : 0,
+            "List::Util" : 0,
+            "Moose" : 0,
+            "Redis" : 0,
+            "Test::More" : "0.88",
+            "parent" : 0
+         }
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "repository" : {
+         "type" : "git",
+         "url" : "http://github.com/tsee/ShardedKV",
+         "web" : "http://github.com/tsee/ShardedKV"
+      }
+   },
+   "version" : "0.01"
+}
+
