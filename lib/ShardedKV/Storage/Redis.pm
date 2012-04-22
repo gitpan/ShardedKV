@@ -1,19 +1,23 @@
 package ShardedKV::Storage::Redis;
 {
-  $ShardedKV::Storage::Redis::VERSION = '0.01';
+  $ShardedKV::Storage::Redis::VERSION = '0.02';
 }
 use Moose;
+# ABSTRACT: Abstract base class for storing k/v pairs in Redis
+
 use Encode;
 use Redis;
 use List::Util qw(shuffle);
 
 with 'ShardedKV::Storage';
 
+
 has 'redis_master_str' => (
   is => 'ro',
   isa => 'Str',
   required => 1,
 );
+
 
 # For either failover or reading => TODO might make sense to separate the two
 has 'redis_slave_strs' => (
@@ -23,6 +27,7 @@ has 'redis_slave_strs' => (
   default => sub {[]},
 );
 
+
 has 'redis_master' => (
   is => 'rw',
   isa => 'Redis',
@@ -30,10 +35,12 @@ has 'redis_master' => (
   builder => '_make_master_conn',
 );
 
+
 has 'expiration_time' => ( # in seconds
   is => 'rw',
   #isa => 'Num',
 );
+
 
 has 'database_number' => (
   is => 'rw',
@@ -75,22 +82,32 @@ sub _make_slave_conn {
   return $conn;
 }
 
+
 sub delete {
   my ($self, $key) = @_;
   return $self->master->delete($key);
 }
 
+
 sub get { die "Method get() not implemented in abstract base class" }
+
+
 sub set { die "Method set() not implemented in abstract base class" }
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
-__END__
+
+
+=pod
 
 =head1 NAME
 
 ShardedKV::Storage::Redis - Abstract base class for storing k/v pairs in Redis
+
+=head1 VERSION
+
+version 0.02
 
 =head1 SYNOPSIS
 
@@ -104,7 +121,7 @@ the C<get()> and C<set()> methods and does not impose a Redis value type.
 Different subclasses of this class are expected to represent different
 storages for distinct Redis value types.
 
-=head1 OBJECT ATTRIBUTES
+=head1 PUBLIC ATTRIBUTES
 
 =head2 redis_master_str
 
@@ -133,7 +150,7 @@ Indicates the number of the Redis database to use for this shard.
 If undef/non-existant, no specific database will be selected,
 so the Redis server will use the default.
 
-=head1 METHODS
+=head1 PUBLIC METHODS
 
 =head2 delete
 
@@ -155,21 +172,53 @@ be of the same reference type that is returned by C<get()>.
 
 =head1 SEE ALSO
 
-L<ShardedKV>, L<ShardedKV::Storage>, L<ShardedKV::Storage::Redis::String>,
+=over 4
+
+=item *
+
+L<ShardedKV>
+
+=item *
+
+L<ShardedKV::Storage>
+
+=item *
+
+L<ShardedKV::Storage::Redis::String>
+
+=item *
+
 L<ShardedKV::Storage::Redis::Hash>
+
+=item *
 
 L<Redis>
 
-=head1 AUTHOR
+=back
 
-Steffen Mueller E<lt>smueller@cpan.orgE<gt>
+=head1 AUTHORS
+
+=over 4
+
+=item *
+
+Steffen Mueller <smueller@cpan.org>
+
+=item *
+
+Nick Perez <nperez@cpan.org>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012 by Steffen Mueller
+This software is copyright (c) 2012 by Steffen Mueller.
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.1 or,
-at your option, any later version of Perl 5 you may have available.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
+
+
+__END__
+

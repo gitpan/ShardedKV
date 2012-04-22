@@ -10,7 +10,7 @@ use ExtUtils::MakeMaker 6.30;
 
 my %WriteMakefileArgs = (
   "ABSTRACT" => "An interface to sharded key-value stores",
-  "AUTHOR" => "Steffen Mueller <smueller\@cpan.org>",
+  "AUTHOR" => "Steffen Mueller <smueller\@cpan.org>, Nick Perez <nperez\@cpan.org>",
   "BUILD_REQUIRES" => {},
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => "6.30"
@@ -26,13 +26,14 @@ my %WriteMakefileArgs = (
     "DBI" => 0,
     "Data::Dumper" => 0,
     "JSON" => 0,
+    "JSON::XS" => 0,
     "List::Util" => 0,
     "Moose" => 0,
     "Redis" => 0,
     "Test::More" => "0.88",
     "parent" => 0
   },
-  "VERSION" => "0.01",
+  "VERSION" => "0.02",
   "test" => {
     "TESTS" => "t/*.t"
   }

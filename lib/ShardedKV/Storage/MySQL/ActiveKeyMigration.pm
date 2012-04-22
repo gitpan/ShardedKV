@@ -1,14 +1,14 @@
 package ShardedKV::Storage::MySQL::ActiveKeyMigration;
 {
-  $ShardedKV::Storage::MySQL::ActiveKeyMigration::VERSION = '0.01';
+  $ShardedKV::Storage::MySQL::ActiveKeyMigration::VERSION = '0.02';
 }
 use strict;
 use warnings;
+# ABSTRACT: Simple-minded active key migration for the MySQL storage back-end
 use Scalar::Util qw(blessed);
 use Carp qw(croak);
 use Time::HiRes qw(sleep);
 
-# WARNING: Consider this untested alpha code. Use at your own risk!
 
 
 # MySQL storage only!
@@ -121,3 +121,42 @@ sub migrate_to_additional_storage {
 }
 
 1;
+
+__END__
+=pod
+
+=head1 NAME
+
+ShardedKV::Storage::MySQL::ActiveKeyMigration - Simple-minded active key migration for the MySQL storage back-end
+
+=head1 VERSION
+
+version 0.02
+
+=head1 DESCRIPTION
+
+B<WARNING>: Consider this entirely untested alpha code. Use at your own risk!
+
+=head1 AUTHORS
+
+=over 4
+
+=item *
+
+Steffen Mueller <smueller@cpan.org>
+
+=item *
+
+Nick Perez <nperez@cpan.org>
+
+=back
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2012 by Steffen Mueller.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
+

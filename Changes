@@ -1,0 +1,10 @@
+Revision history for Perl extension Foo.
+
+0.02      2012-04-22 11:33:31 Europe/Berlin
+
+  - Fix missing dependencies
+  - Start using Pod::Weaver
+
+0.01  Sat Apr 21 12:00:00 2012
+  - original version
+

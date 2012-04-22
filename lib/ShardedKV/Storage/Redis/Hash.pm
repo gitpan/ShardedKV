@@ -1,8 +1,9 @@
 package ShardedKV::Storage::Redis::Hash;
 {
-  $ShardedKV::Storage::Redis::Hash::VERSION = '0.01';
+  $ShardedKV::Storage::Redis::Hash::VERSION = '0.02';
 }
 use Moose;
+# ABSTRACT: Storing hash values in Redis
 use parent 'ShardedKV::Storage::Redis';
 use Encode;
 use Redis;
@@ -35,11 +36,17 @@ sub set {
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
-__END__
+
+
+=pod
 
 =head1 NAME
 
 ShardedKV::Storage::Redis::Hash - Storing hash values in Redis
+
+=head1 VERSION
+
+version 0.02
 
 =head1 SYNOPSIS
 
@@ -68,19 +75,49 @@ actually scalar references to strings.
 
 =head1 SEE ALSO
 
-L<ShardedKV>, L<ShardedKV::Storage>
-L<ShardedKV::Storage::Redis>, L<ShardedKV::Storage::Redis::String>
+=over 4
 
-=head1 AUTHOR
+=item *
 
-Steffen Mueller E<lt>smueller@cpan.orgE<gt>
+L<ShardedKV>
+
+=item *
+
+L<ShardedKV::Storage>
+
+=item *
+
+L<ShardedKV::Storage::Redis>
+
+=item *
+
+L<ShardedKV::Storage::Redis::String>
+
+=back
+
+=head1 AUTHORS
+
+=over 4
+
+=item *
+
+Steffen Mueller <smueller@cpan.org>
+
+=item *
+
+Nick Perez <nperez@cpan.org>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012 by Steffen Mueller
+This software is copyright (c) 2012 by Steffen Mueller.
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.1 or,
-at your option, any later version of Perl 5 you may have available.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
+
+
+__END__
+

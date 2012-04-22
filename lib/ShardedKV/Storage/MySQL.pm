@@ -1,8 +1,9 @@
 package ShardedKV::Storage::MySQL;
 {
-  $ShardedKV::Storage::MySQL::VERSION = '0.01';
+  $ShardedKV::Storage::MySQL::VERSION = '0.02';
 }
 use Moose;
+# ABSTRACT: MySQL storage backend for ShardedKV
 
 with 'ShardedKV::Storage';
 
@@ -168,30 +169,76 @@ sub delete {
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
-__END__
+
+
+=pod
 
 =head1 NAME
 
 ShardedKV::Storage::MySQL - MySQL storage backend for ShardedKV
 
+=head1 VERSION
+
+version 0.02
+
 =head1 SYNOPSIS
+
+  TODO
 
 =head1 DESCRIPTION
 
+A C<ShardedKV> storage backend that C<DBI> and C<DBD::mysql> to
+store data in a MySQL table.
+
+Implements the C<ShardedKV::Storage> role.
+
+TODO more docs
+
 =head1 SEE ALSO
+
+=over 4
+
+=item *
 
 L<ShardedKV>
 
-=head1 AUTHOR
+=item *
 
-Steffen Mueller E<lt>smueller@cpan.orgE<gt>
+L<ShardedKV::Storage>
+
+=item *
+
+L<DBI>
+
+=item *
+
+L<DBD::mysql>
+
+=back
+
+=head1 AUTHORS
+
+=over 4
+
+=item *
+
+Steffen Mueller <smueller@cpan.org>
+
+=item *
+
+Nick Perez <nperez@cpan.org>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012 by Steffen Mueller
+This software is copyright (c) 2012 by Steffen Mueller.
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.1 or,
-at your option, any later version of Perl 5 you may have available.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
+
+
+__END__
+

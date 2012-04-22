@@ -1,8 +1,10 @@
 package ShardedKV::Continuum;
 {
-  $ShardedKV::Continuum::VERSION = '0.01';
+  $ShardedKV::Continuum::VERSION = '0.02';
 }
 use Moose::Role;
+# ABSTRACT: The continuum role
+
 
 requires qw(
   choose
@@ -17,11 +19,17 @@ no Moose;
 
 1;
 
-__END__
+
+
+=pod
 
 =head1 NAME
 
 ShardedKV::Continuum - The continuum role
+
+=head1 VERSION
+
+version 0.02
 
 =head1 SYNOPSIS
 
@@ -38,7 +46,7 @@ methods correctly can be used as a sharding algorithm for a L<ShardedKV>.
 
 See L<ShardedKV::Continuum::Ketama> for an example.
 
-=head1 METHODS YOU NEED TO IMPLEMENT
+=head1 ROLE REQUIRES
 
 =head2 choose
 
@@ -68,18 +76,41 @@ Returns a list of all shard/bucket names in the continuum.
 
 =head1 SEE ALSO
 
-L<ShardedKV>, L<ShardedKV::Continuum::Ketama>
+=over 4
 
-=head1 AUTHOR
+=item *
 
-Steffen Mueller E<lt>smueller@cpan.orgE<gt>
+L<ShardedKV>
+
+=item *
+
+L<ShardedKV::Continuum::Ketama>
+
+=back
+
+=head1 AUTHORS
+
+=over 4
+
+=item *
+
+Steffen Mueller <smueller@cpan.org>
+
+=item *
+
+Nick Perez <nperez@cpan.org>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012 by Steffen Mueller
+This software is copyright (c) 2012 by Steffen Mueller.
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.1 or,
-at your option, any later version of Perl 5 you may have available.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
+
+
+__END__
+

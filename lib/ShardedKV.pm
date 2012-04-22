@@ -1,12 +1,15 @@
 package ShardedKV;
 {
-  $ShardedKV::VERSION = '0.01';
+  $ShardedKV::VERSION = '0.02';
 }
 use Moose;
+# ABSTRACT: An interface to sharded key-value stores
 
 require ShardedKV::Storage;
 require ShardedKV::Storage::Memory;
 require ShardedKV::Continuum;
+
+
 
 has 'continuum' => (
   is => 'rw',
@@ -14,16 +17,20 @@ has 'continuum' => (
   required => 1,
 );
 
+
 has 'migration_continuum' => (
   is => 'rw',
   does => 'ShardedKV::Continuum',
 );
+
 
 has 'storages' => (
   is => 'ro',
   isa => 'HashRef', # of ShardedKV::Storage doing-things
   default => sub { +{} },
 );
+
+
 
 # bypassing accessors since this is a hot path
 sub get {
@@ -56,6 +63,7 @@ sub get {
   return $value_ref;
 }
 
+
 # bypassing accessors since this is a hot path
 sub set {
   my ($self, $key, $value_ref) = @_;
@@ -70,6 +78,7 @@ sub set {
 
   $storage->set($key, $value_ref);
 }
+
 
 sub delete {
   my ($self, $key) = @_;
@@ -86,6 +95,7 @@ sub delete {
   $storage->delete($key);
 }
 
+
 sub begin_migration {
   my ($self, $migration_continuum) = @_;
 
@@ -96,6 +106,7 @@ sub begin_migration {
   $self->migration_continuum($migration_continuum);
 }
 
+
 sub end_migration {
   my ($self) = @_;
   $self->continuum($self->migration_continuum);
@@ -105,11 +116,17 @@ sub end_migration {
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
-__END__
+
+
+=pod
 
 =head1 NAME
 
 ShardedKV - An interface to sharded key-value stores
+
+=head1 VERSION
+
+version 0.02
 
 =head1 SYNOPSIS
 
@@ -162,7 +179,7 @@ to add one or more servers to the continuum and use passive key migration
 to extend capacity without downtime. Do make it a point to understand the
 logic before using it. More on that below.
 
-=head1 OBJECT ATTRIBUTES
+=head1 PUBLIC ATTRIBUTES
 
 =head2 continuum
 
@@ -183,7 +200,7 @@ Keys in the hash must be the same labels/shard names that are used
 in the continuum. Each storage object must implement the
 C<ShardedKV::Storage> role.
 
-=head1 METHODS
+=head1 PUBLIC METHODS
 
 =head2 get
 
@@ -288,23 +305,89 @@ See the C<begin_migration> docs above.
 
 =head1 SEE ALSO
 
-L<ShardedKV::Storage>, L<ShardedKV::Storage::Redis>,
-L<ShardedKV::Storage::Memory>, L<ShardedKV::Storage::MySQL>
+=over 4
 
-L<ShardedKV::Continuum>, L<ShardedKV::Continuum::Ketama>
+=item *
 
-L<Algorithm::ConsistentHash::Ketama>, L<https://github.com/RJ/ketama>
+L<ShardedKV::Storage>
 
-=head1 AUTHOR
+=item *
 
-Steffen Mueller E<lt>smueller@cpan.orgE<gt>
+L<ShardedKV::Storage::Redis>
+
+=item *
+
+L<Redis>
+
+=item *
+
+L<ShardedKV::Storage::Memory>
+
+=item *
+
+L<ShardedKV::Storage::MySQL>
+
+=item *
+
+L<DBI>
+
+=item *
+
+L<DBD::mysql>
+
+=back
+
+=over 4
+
+=item *
+
+L<ShardedKV::Continuum>
+
+=item *
+
+L<ShardedKV::Continuum::Ketama>
+
+=item *
+
+L<Algorithm::ConsistentHash::Ketama>
+
+=item *
+
+L<https://github.com/RJ/ketama>
+
+=back
+
+=head1 ACKNLOWLEDGMENT
+
+This module was originally developed for booking.com.
+With approval from booking.com, this module was generalized
+and put on CPAN, for which the authors would like to express
+their gratitude.
+
+=head1 AUTHORS
+
+=over 4
+
+=item *
+
+Steffen Mueller <smueller@cpan.org>
+
+=item *
+
+Nick Perez <nperez@cpan.org>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012 by Steffen Mueller
+This software is copyright (c) 2012 by Steffen Mueller.
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.1 or,
-at your option, any later version of Perl 5 you may have available.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
+
+
+__END__
+
+
