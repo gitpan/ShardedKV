@@ -1,6 +1,6 @@
 package ShardedKV::Storage::Redis;
 {
-  $ShardedKV::Storage::Redis::VERSION = '0.02';
+  $ShardedKV::Storage::Redis::VERSION = '0.03';
 }
 use Moose;
 # ABSTRACT: Abstract base class for storing k/v pairs in Redis
@@ -48,8 +48,8 @@ has 'database_number' => (
   trigger => sub {
     my $self = shift;
     $self->{database_number} = shift;
-    if (defined $self->{master}) {
-      $self->master->select($self->{database_number});
+    if (defined $self->{redis_master}) {
+      $self->redis_master->select($self->{database_number});
     }
   },
 );
@@ -85,7 +85,7 @@ sub _make_slave_conn {
 
 sub delete {
   my ($self, $key) = @_;
-  return $self->master->delete($key);
+  return $self->redis_master->del($key);
 }
 
 
@@ -107,7 +107,7 @@ ShardedKV::Storage::Redis - Abstract base class for storing k/v pairs in Redis
 
 =head1 VERSION
 
-version 0.02
+version 0.03
 
 =head1 SYNOPSIS
 

@@ -8,6 +8,7 @@ README
 author_tools/README
 author_tools/active_key_migration_test.pl
 author_tools/testmysqldsn.conf
+author_tools/testredis.conf
 dist.ini
 lib/ShardedKV.pm
 lib/ShardedKV/Continuum.pm
@@ -22,8 +23,6 @@ lib/ShardedKV/Storage/Redis/String.pm
 t/00load.t
 t/01basic.t
 t/02extend.t
-t/20mysql_basic.t
-t/21mysql_extend.t
 t/lib/ShardedKV/Test.pm
 t/release-pod-syntax.t
 weaver.ini

@@ -1,6 +1,6 @@
 package ShardedKV::Storage::Redis::Hash;
 {
-  $ShardedKV::Storage::Redis::Hash::VERSION = '0.02';
+  $ShardedKV::Storage::Redis::Hash::VERSION = '0.03';
 }
 use Moose;
 # ABSTRACT: Storing hash values in Redis
@@ -15,7 +15,7 @@ sub get {
   my $master = $self->redis_master;
   my %hash = $master->hgetall($key);
   #Encode::_utf8_on($$vref); # FIXME wrong, wrong, wrong, but Redis.pm would otherwise call encode() all the time
-  return \%hash;
+  return keys(%hash) ? \%hash : undef;
 }
 
 sub set {
@@ -24,7 +24,7 @@ sub set {
     Carp::croak("Value must be a hashref");
   }
 
-  my $r = $self->master;
+  my $r = $self->redis_master;
   my $rv = $r->hmset($key, %$value_ref);
 
   my $expire = $self->expiration_time;
@@ -46,7 +46,7 @@ ShardedKV::Storage::Redis::Hash - Storing hash values in Redis
 
 =head1 VERSION
 
-version 0.02
+version 0.03
 
 =head1 SYNOPSIS
 

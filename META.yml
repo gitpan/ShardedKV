@@ -28,4 +28,4 @@ requires:
   parent: 0
 resources:
   repository: http://github.com/tsee/p5-ShardedKV
-version: 0.02
+version: 0.03
