@@ -21,6 +21,7 @@ my %WriteMakefileArgs = (
   "NAME" => "ShardedKV",
   "PREREQ_PM" => {
     "Algorithm::ConsistentHash::Ketama" => 0,
+    "Array::IntSpan" => 0,
     "Carp" => 0,
     "DBD::mysql" => 0,
     "DBI" => 0,
@@ -29,11 +30,12 @@ my %WriteMakefileArgs = (
     "JSON::XS" => 0,
     "List::Util" => 0,
     "Moose" => 0,
+    "POSIX" => 0,
     "Redis" => 0,
     "Test::More" => "0.88",
     "parent" => 0
   },
-  "VERSION" => "0.03",
+  "VERSION" => "0.04",
   "test" => {
     "TESTS" => "t/*.t"
   }

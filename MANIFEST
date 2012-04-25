@@ -13,6 +13,7 @@ dist.ini
 lib/ShardedKV.pm
 lib/ShardedKV/Continuum.pm
 lib/ShardedKV/Continuum/Ketama.pm
+lib/ShardedKV/Continuum/StaticMapping.pm
 lib/ShardedKV/Storage.pm
 lib/ShardedKV/Storage/Memory.pm
 lib/ShardedKV/Storage/MySQL.pm
