@@ -1,6 +1,6 @@
 package ShardedKV::Continuum::Ketama;
 {
-  $ShardedKV::Continuum::Ketama::VERSION = '0.07';
+  $ShardedKV::Continuum::Ketama::VERSION = '0.08';
 }
 use Moose;
 # ABSTRACT: Continuum implementation based on ketama consistent hashing
@@ -97,7 +97,7 @@ ShardedKV::Continuum::Ketama - Continuum implementation based on ketama consiste
 
 =head1 VERSION
 
-version 0.07
+version 0.08
 
 =head1 SYNOPSIS
 

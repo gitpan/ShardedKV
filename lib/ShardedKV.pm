@@ -1,6 +1,6 @@
 package ShardedKV;
 {
-  $ShardedKV::VERSION = '0.07';
+  $ShardedKV::VERSION = '0.08';
 }
 use Moose;
 # ABSTRACT: An interface to sharded key-value stores
@@ -139,7 +139,7 @@ ShardedKV - An interface to sharded key-value stores
 
 =head1 VERSION
 
-version 0.07
+version 0.08
 
 =head1 SYNOPSIS
 

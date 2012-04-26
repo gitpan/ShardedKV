@@ -1,6 +1,6 @@
 package ShardedKV::Storage::MySQL;
 {
-  $ShardedKV::Storage::MySQL::VERSION = '0.07';
+  $ShardedKV::Storage::MySQL::VERSION = '0.08';
 }
 use Moose;
 # ABSTRACT: MySQL storage backend for ShardedKV
@@ -215,7 +215,7 @@ ShardedKV::Storage::MySQL - MySQL storage backend for ShardedKV
 
 =head1 VERSION
 
-version 0.07
+version 0.08
 
 =head1 SYNOPSIS
 

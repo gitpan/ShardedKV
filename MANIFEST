@@ -26,5 +26,4 @@ t/01basic.t
 t/02extend.t
 t/lib/ShardedKV/Test.pm
 t/release-pod-syntax.t
-testredis.conf
 weaver.ini
