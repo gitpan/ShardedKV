@@ -1,6 +1,6 @@
 package ShardedKV::Continuum::StaticMapping;
 {
-  $ShardedKV::Continuum::StaticMapping::VERSION = '0.05';
+  $ShardedKV::Continuum::StaticMapping::VERSION = '0.07';
 }
 use Moose;
 # ABSTRACT: A continuum strategy based on a simple "significant bits" static mapping
@@ -171,7 +171,7 @@ ShardedKV::Continuum::StaticMapping - A continuum strategy based on a simple "si
 
 =head1 VERSION
 
-version 0.05
+version 0.07
 
 =head1 SYNOPSIS
 

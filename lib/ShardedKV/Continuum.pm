@@ -1,6 +1,6 @@
 package ShardedKV::Continuum;
 {
-  $ShardedKV::Continuum::VERSION = '0.05';
+  $ShardedKV::Continuum::VERSION = '0.07';
 }
 use Moose::Role;
 # ABSTRACT: The continuum role
@@ -29,7 +29,7 @@ ShardedKV::Continuum - The continuum role
 
 =head1 VERSION
 
-version 0.05
+version 0.07
 
 =head1 SYNOPSIS
 
@@ -85,6 +85,10 @@ L<ShardedKV>
 =item *
 
 L<ShardedKV::Continuum::Ketama>
+
+=item *
+
+L<ShardedKV::Continuum::StaticMapping>
 
 =back
 

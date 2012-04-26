@@ -1,6 +1,6 @@
 package ShardedKV::Storage::Memory;
 {
-  $ShardedKV::Storage::Memory::VERSION = '0.05';
+  $ShardedKV::Storage::Memory::VERSION = '0.07';
 }
 use Moose;
 # ABSTRACT: Testing storage backend for in-memory storage
@@ -43,7 +43,7 @@ ShardedKV::Storage::Memory - Testing storage backend for in-memory storage
 
 =head1 VERSION
 
-version 0.05
+version 0.07
 
 =head1 SYNOPSIS
 

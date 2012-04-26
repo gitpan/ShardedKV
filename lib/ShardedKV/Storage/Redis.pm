@@ -1,6 +1,6 @@
 package ShardedKV::Storage::Redis;
 {
-  $ShardedKV::Storage::Redis::VERSION = '0.05';
+  $ShardedKV::Storage::Redis::VERSION = '0.07';
 }
 use Moose;
 # ABSTRACT: Abstract base class for storing k/v pairs in Redis
@@ -40,6 +40,14 @@ has 'expiration_time' => ( # in seconds
   is => 'rw',
   #isa => 'Num',
 );
+
+
+has 'expiration_time_jitter' => ( # in seconds
+  is => 'rw',
+  #isa => 'Num',
+  default => 0,
+);
+
 
 
 has 'database_number' => (
@@ -107,7 +115,7 @@ ShardedKV::Storage::Redis - Abstract base class for storing k/v pairs in Redis
 
 =head1 VERSION
 
-version 0.05
+version 0.07
 
 =head1 SYNOPSIS
 
@@ -142,7 +150,14 @@ at any time.
 
 =head2 expiration_time
 
-Key expiration time to use in seconds.
+Base key expiration time to use in seconds.
+Defaults to undef / not expiring at all.
+
+=head2 expiration_time_jitter
+
+Additional random jitter to add to the expiration time.
+Defaults to 0. Don't set to undef to disable, set to 0
+to disable.
 
 =head2 database_number
 

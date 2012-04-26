@@ -1,6 +1,6 @@
 package ShardedKV::Storage::Redis::String;
 {
-  $ShardedKV::Storage::Redis::String::VERSION = '0.05';
+  $ShardedKV::Storage::Redis::String::VERSION = '0.07';
 }
 use Moose;
 # ABSTRACT: Storing simple string values in Redis
@@ -21,8 +21,15 @@ sub set {
   my ($self, $key, $value_ref) = @_;
   my $r = $self->redis_master;
   my $expire = $self->expiration_time;
+
   my $rv = $r->set($key, $$value_ref);
-  $r->expire($key, $expire) if $expire;
+
+  if (defined $expire) {
+    $r->pexpire(
+      $key, int(1000*($expire+rand($self->expiration_time_jitter)))
+    );
+  }
+
   return $rv;
 }
 
@@ -39,7 +46,7 @@ ShardedKV::Storage::Redis::String - Storing simple string values in Redis
 
 =head1 VERSION
 
-version 0.05
+version 0.07
 
 =head1 SYNOPSIS
 

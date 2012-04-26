@@ -1,6 +1,6 @@
 package ShardedKV::Storage::Redis::Hash;
 {
-  $ShardedKV::Storage::Redis::Hash::VERSION = '0.05';
+  $ShardedKV::Storage::Redis::Hash::VERSION = '0.07';
 }
 use Moose;
 # ABSTRACT: Storing hash values in Redis
@@ -28,7 +28,11 @@ sub set {
   my $rv = $r->hmset($key, %$value_ref);
 
   my $expire = $self->expiration_time;
-  $r->expire($key, $expire) if $expire;
+  if (defined $expire) {
+    $r->pexpire(
+      $key, int(1000*($expire+rand($self->expiration_time_jitter)))
+    );
+  }
 
   return $rv;
 }
@@ -46,7 +50,7 @@ ShardedKV::Storage::Redis::Hash - Storing hash values in Redis
 
 =head1 VERSION
 
-version 0.05
+version 0.07
 
 =head1 SYNOPSIS
 

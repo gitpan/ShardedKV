@@ -1,5 +1,10 @@
 Revision history for Perl extension Foo.
 
+0.07      2012-04-26 16:07:08 Europe/Berlin
+
+  - POD fixes.
+  - Optional jitter added to Redis expiration time.
+
 0.05      2012-04-26 08:03:10 Europe/Berlin
 
   - Allow any number of value columns in MySQL storage backend.
