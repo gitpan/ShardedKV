@@ -1,5 +1,9 @@
 Revision history for Perl extension Foo.
 
+0.05      2012-04-26 08:03:10 Europe/Berlin
+
+  - Allow any number of value columns in MySQL storage backend.
+
 0.04      2012-04-25 10:22:37 Europe/Berlin
 
   - delete() now handles migrations correctly.

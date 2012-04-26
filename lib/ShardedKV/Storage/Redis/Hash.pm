@@ -1,6 +1,6 @@
 package ShardedKV::Storage::Redis::Hash;
 {
-  $ShardedKV::Storage::Redis::Hash::VERSION = '0.04';
+  $ShardedKV::Storage::Redis::Hash::VERSION = '0.05';
 }
 use Moose;
 # ABSTRACT: Storing hash values in Redis
@@ -46,7 +46,7 @@ ShardedKV::Storage::Redis::Hash - Storing hash values in Redis
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 SYNOPSIS
 
