@@ -1,7 +1,7 @@
 
 
 This archive contains the distribution ShardedKV,
-version 0.09:
+version 0.10:
 
   An interface to sharded key-value stores
 

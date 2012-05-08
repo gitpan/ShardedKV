@@ -1,6 +1,6 @@
 package ShardedKV::Storage::MySQL;
 {
-  $ShardedKV::Storage::MySQL::VERSION = '0.09';
+  $ShardedKV::Storage::MySQL::VERSION = '0.10';
 }
 use Moose;
 # ABSTRACT: MySQL storage backend for ShardedKV
@@ -10,11 +10,13 @@ use Carp ();
 
 with 'ShardedKV::Storage';
 
+
 has 'mysql_master_connector' => (
   is => 'rw',
   isa => 'CodeRef',
   required => 1,
 );
+
 
 # This could be shared among many "::Storage::MySQL" objects since we're
 # single-threaded (and they would not work across multiple ithreads anyway).
@@ -22,7 +24,7 @@ has 'mysql_master_connector' => (
 # above which needs to know how to obtain a new or existing connection.
 # This means that we can make each Storage::MySQL object be specific to
 # a particular table!
-has 'mysql_connection' => (
+has '_mysql_connection' => (
   is => 'rw',
   lazy => 1,
   builder => '_make_master_conn',
@@ -40,26 +42,33 @@ sub _make_master_conn {
   return $dbh;
 }
 
+
 has 'table_name' => (
   is => 'ro',
   isa => 'Str',
   required => 1,
 );
 
+
 has 'key_col_name' => (
   is => 'ro',
   default => "keystr",
 );
+
+
 has 'key_col_type' => (
   is => 'ro',
   default => "CHAR(16) NOT NULL",
 );
+
 
 has 'value_col_names' => (
   is => 'ro',
   # isa => 'ArrayRef[Str]',
   default => sub {[qw(val last_change)]}
 );
+
+
 has 'value_col_types' => (
   is => 'ro',
   # isa => 'ArrayRef[Str]',
@@ -69,27 +78,43 @@ has 'value_col_types' => (
     #'TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
   ]},
 );
+
+
 has 'extra_indexes' => (
   is => 'ro',
   isa => 'Str',
   default => '',
 );
 
+
+has 'max_num_reconnect_attempts' => (
+  is => 'rw',
+  isa => 'Int',
+  default => 5,
+);
+
+
+has 'reconnect_interval' => (
+  is => 'rw',
+  isa => 'Num',
+  default => 1,
+);
+
 # Could be prepared, but that is kind of nasty wrt. reconnects, so let's not go
 # there unless we have to!
-has 'get_query' => (
+has '_get_query' => (
   is => 'ro',
   isa => 'Str',
   lazy => 1,
   builder => '_make_get_query',
 );
-has 'set_query' => (
+has '_set_query' => (
   is => 'ro',
   isa => 'Str',
   lazy => 1,
   builder => '_make_set_query',
 );
-has 'delete_query' => (
+has '_delete_query' => (
   is => 'ro',
   isa => 'Str',
   lazy => 1,
@@ -101,19 +126,6 @@ has '_number_of_params' => (
   # isa => 'Int',
   lazy => 1,
   builder => '_calc_no_params',
-);
-
-has 'max_num_reconnect_attempts' => (
-  is => 'rw',
-  isa => 'Int',
-  default => 5,
-);
-
-# Note that exponential back-off is on by default
-has 'reconnect_interval' => (
-  is => 'rw',
-  isa => 'Num',
-  default => 1,
 );
 
 sub _calc_no_params {
@@ -129,6 +141,7 @@ sub _make_get_query {
   my $v_col_str = join ',', @$v_cols;
   return qq{SELECT $v_col_str FROM $tbl WHERE $key_col = ? LIMIT 1};
 }
+
 sub _make_set_query {
   my $self = shift;
   my $tbl = $self->table_name;
@@ -145,6 +158,7 @@ sub _make_set_query {
   };
   return $q;
 }
+
 sub _make_delete_query {
   my $self = shift;
   $self->_number_of_params; # prepopulate
@@ -183,14 +197,14 @@ sub prepare_table {
 # a cached connection.
 sub refresh_connection {
   my $self = shift;
-  delete $self->{mysql_connection};
-  return $self->mysql_connection;
+  delete $self->{_mysql_connection};
+  return $self->_mysql_connection;
 }
 
 sub get_master_dbh {
   my $self = shift;
   # fetch from master by default (TODO revisit later)
-  my $master_dbh = $self->mysql_connection;
+  my $master_dbh = $self->_mysql_connection;
   if (not defined $master_dbh) {
     $master_dbh = $self->refresh_connection;
   }
@@ -230,7 +244,7 @@ sub _run_sql {
 
 sub get {
   my ($self, $key) = @_;
-  my $rv = $self->_run_sql('selectall_arrayref', $self->get_query, undef, $key);
+  my $rv = $self->_run_sql('selectall_arrayref', $self->_get_query, undef, $key);
   return ref($rv) ? $rv->[0] : undef;
 }
 
@@ -240,13 +254,13 @@ sub set {
   Carp::croak("Need exactly " . ($self->{_number_of_params}-1) . " values, got " . scalar(@$value_ref))
     if not scalar(@$value_ref) == $self->{_number_of_params}-1;
 
-  my $rv = $self->_run_sql('do', $self->set_query, undef, $key, @$value_ref);
+  my $rv = $self->_run_sql('do', $self->_set_query, undef, $key, @$value_ref);
   return $rv ? 1 : 0;
 }
 
 sub delete {
   my ($self, $key) = @_;
-  my $rv = $self->_run_sql('do', $self->delete_query, undef, $key);
+  my $rv = $self->_run_sql('do', $self->_delete_query, undef, $key);
   return $rv ? 1 : 0;
 }
 
@@ -263,11 +277,20 @@ ShardedKV::Storage::MySQL - MySQL storage backend for ShardedKV
 
 =head1 VERSION
 
-version 0.09
+version 0.10
 
 =head1 SYNOPSIS
 
-  TODO
+  use ShardedKV;
+  use ShardedKV::Storage::MySQL;
+  ... create ShardedKV...
+  my $storage = ShardedKV::Storage::MySQL->new(
+  );
+  ... put storage into ShardedKV...
+  
+  # values are array references
+  $skv->set("foo", ["bar"]);
+  my $value_ref = $skv->get("foo");
 
 =head1 DESCRIPTION
 
@@ -276,7 +299,94 @@ store data in a MySQL table.
 
 Implements the C<ShardedKV::Storage> role.
 
-TODO more docs
+Each shard (== C<ShardedKV::Storage::MySQL> object) is represented by a
+single table in some schema on some database server.
+
+=head1 PUBLIC ATTRIBUTES
+
+=head2 mysql_master_connector
+
+A callback that must be supplied at object creation time. The storage
+object will invoke the callback whenever it needs to get a NEW mysql
+database handle. This means when:
+
+  - first connecting
+  - "MySQL server has gone away" => reconnect
+
+The callback allows users to hook into the connection logic to implement
+things such as connection caching. If you do use connection caching, then
+do assert that the dbh is alive (eg. using C<$dbh-E<gt>ping()> before
+returning a cached connection.
+
+=head2 table_name
+
+The name of the table that represents this shard.
+Must be supplied at object creation.
+
+=head2 key_col_name
+
+The name of the column to be used for the key.
+If C<ShardedKV::Storage::MySQL> creates the shard table for you, then
+this column is also used as the primary key.
+
+There can only be one key column.
+
+Defaults to 'keystr'.
+
+=head2 key_col_type
+
+The MySQL type of the key column.
+
+Defaults to 'CHAR(16) NOT NULL'.
+
+=head2 value_col_names
+
+An array reference containing the names of all value columns in
+the shard table. Needs to contain at least one value column.
+
+Defaults to C<[qw(val last_change)]>.
+
+=head2 value_col_types
+
+An array reference containing the MySQL types of each value column
+given in C<value_col_names>.
+
+Defaults to: C<['MEDIUMBLOB NOT NULL', 'TIMESTAMP NOT NULL']>.
+
+=head2 extra_indexes
+
+A string that is included verbatim after the PRIMARY KEY line of the
+CREATE TABLE IF NOT EXISTS statement that this class generates. This can be
+used to add additional indexes to the shard tables, such as indexes on the
+last modification (for expiration from the database, not handled by ShardedKV).
+
+=head2 max_num_reconnect_attempts
+
+The maximum number of reconnect attempts that the storage object
+should perform if the MySQL server has gone away.
+Reconnects are done with exponential back-off (see below).
+
+Defaults to 5.
+
+=head2 reconnect_interval
+
+The base interval for reconnection attempts. Do note that
+exponential reconnect back-off is used, so if the base reconnect_interval
+is 1 second, then the first reconnect attempt is done immediately,
+the second after one second, the third after two seconds, the fourth
+after four seconds, and so on.
+
+Default: 1 second
+
+Can also be fractional seconds.
+
+=head1 PRIVATE ATTRIBUTES
+
+=head2 _mysql_connection
+
+This is the private attribute holding a MySQL database handle (which was
+created using the C<mysql_master_connector>). Do not supply this at object
+creation.
 
 =head1 SEE ALSO
 

@@ -1,6 +1,6 @@
 package ShardedKV::Storage::Redis;
 {
-  $ShardedKV::Storage::Redis::VERSION = '0.09';
+  $ShardedKV::Storage::Redis::VERSION = '0.10';
 }
 use Moose;
 # ABSTRACT: Abstract base class for storing k/v pairs in Redis
@@ -115,7 +115,7 @@ ShardedKV::Storage::Redis - Abstract base class for storing k/v pairs in Redis
 
 =head1 VERSION
 
-version 0.09
+version 0.10
 
 =head1 SYNOPSIS
 
