@@ -1,6 +1,6 @@
 package ShardedKV;
 {
-  $ShardedKV::VERSION = '0.11';
+  $ShardedKV::VERSION = '0.12';
 }
 use Moose;
 # ABSTRACT: An interface to sharded key-value stores
@@ -32,6 +32,11 @@ has 'storages' => (
 
 
 
+has 'logger' => (
+  is => 'rw',
+);
+
+
 # bypassing accessors since this is a hot path
 sub get {
   my ($self, $key) = @_;
@@ -39,11 +44,15 @@ sub get {
 
   # dumb code for efficiency (otherwise, this would be a loop or in methods)
 
+  my $logger = $self->{logger};
+  my $do_debug = ($logger and $logger->is_debug) ? 1 : 0;
+
   my $storages = $self->{storages};
   my $chosen_shard;
   my $value_ref;
   if (defined $mig_cont) {
     $chosen_shard = $mig_cont->choose($key);
+    $logger->debug("get()using migration continuum, got storage '$chosen_shard'") if $do_debug;
     my $storage = $storages->{ $chosen_shard };
     die "Failed to find chosen storage (server) for id '$chosen_shard' via key '$key'"
       if not $storage;
@@ -52,6 +61,7 @@ sub get {
 
   if (not defined $value_ref) {
     my $where = $cont->choose($key);
+    $logger->debug("get()using regular continuum, got storage '$where'") if $do_debug;
     if (!$chosen_shard or $where ne $chosen_shard) {
       my $storage = $storages->{ $where };
       die "Failed to find chosen storage (server) for id '$where' via key '$key'"
@@ -87,11 +97,15 @@ sub delete {
 
   # dumb code for efficiency (otherwise, this would be a loop or in methods)
 
+  my $logger = $self->{logger};
+  my $do_debug = ($logger and $logger->is_debug) ? 1 : 0;
+
   my $storages = $self->{storages};
   my $chosen_shard;
   # Try deleting from shard pointed at by migr. cont. first
   if (defined $mig_cont) {
     $chosen_shard = $mig_cont->choose($key);
+    $logger->debug("Deleting from migration continuum, got storage '$chosen_shard'") if $do_debug;
     my $storage = $storages->{ $chosen_shard };
     die "Failed to find chosen storage (server) for id '$chosen_shard' via key '$key'"
       if not $storage;
@@ -100,6 +114,7 @@ sub delete {
 
   # ALWAYS also delete from the shard pointed at by the main continuum
   my $where = $cont->choose($key);
+  $logger->debug("Deleting from continuum, got storage '$where'") if $do_debug;
   if (!$chosen_shard or $where ne $chosen_shard) {
     my $storage = $storages->{ $where };
     die "Failed to find chosen storage (server) for id '$where' via key '$key'"
@@ -112,9 +127,13 @@ sub delete {
 sub begin_migration {
   my ($self, $migration_continuum) = @_;
 
+  my $logger = $self->{logger};
   if ($self->migration_continuum) {
-    Carp::croak("Cannot start a continuum migration in the middle of another migration");
+    my $err = "Cannot start a continuum migration in the middle of another migration";
+    $logger->fatal($err) if $logger;
+    Carp::croak($err);
   }
+  $logger->info("Starting continuum migration") if $logger;
 
   $self->migration_continuum($migration_continuum);
 }
@@ -122,6 +141,9 @@ sub begin_migration {
 
 sub end_migration {
   my ($self) = @_;
+  my $logger = $self->{logger};
+  $logger->info("Ending continuum migration") if $logger;
+
   $self->continuum($self->migration_continuum);
   delete $self->{migration_continuum};
 }
@@ -139,7 +161,7 @@ ShardedKV - An interface to sharded key-value stores
 
 =head1 VERSION
 
-version 0.11
+version 0.12
 
 =head1 SYNOPSIS
 
@@ -192,6 +214,76 @@ to add one or more servers to the continuum and use passive key migration
 to extend capacity without downtime. Do make it a point to understand the
 logic before using it. More on that below.
 
+=head2 LOGGING
+
+ShardedKV allows instrumentation for logging and debugging by setting
+the C<logger> attribute of the main ShardedKV object, and/or its
+continuum and/or any or all storage sub-objects. If set, the
+C<logger> attribute must be an object implementing the following methods:
+
+=over 4
+
+=item *
+
+trace
+
+=item *
+
+debug
+
+=item *
+
+info
+
+=item *
+
+warn
+
+=item *
+
+error
+
+=item *
+
+fatal
+
+=back
+
+which take a string parameter that is to be logged.
+These logging levels might be familiar since they are taken from L<Log::Log4perl>,
+which means that you can use a C<Log::Log4perl::Logger> object here.
+
+Additionally, the following methods must return whether or not the given log
+level is enabled, to potentially avoid costly construction of log messages:
+
+=over 4
+
+=item *
+
+is_trace
+
+=item *
+
+is_debug
+
+=item *
+
+is_info
+
+=item *
+
+is_warn
+
+=item *
+
+is_error
+
+=item *
+
+is_fatal
+
+=back
+
 =head1 PUBLIC ATTRIBUTES
 
 =head2 continuum
@@ -212,6 +304,12 @@ A hashref of storage objects, each of which represents one shard.
 Keys in the hash must be the same labels/shard names that are used
 in the continuum. Each storage object must implement the
 C<ShardedKV::Storage> role.
+
+=head2 logger
+
+If set, this must be a user-supplied object that implements
+a certain number of methods which are called throughout ShardedKV
+for logging/debugging purposes. See L</LOGGING> for details.
 
 =head1 PUBLIC METHODS
 
@@ -412,5 +510,4 @@ the same terms as the Perl 5 programming language system itself.
 
 
 __END__
-
 

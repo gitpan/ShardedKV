@@ -1,6 +1,6 @@
 package ShardedKV::Continuum::Ketama;
 {
-  $ShardedKV::Continuum::Ketama::VERSION = '0.11';
+  $ShardedKV::Continuum::Ketama::VERSION = '0.12';
 }
 use Moose;
 # ABSTRACT: Continuum implementation based on ketama consistent hashing
@@ -22,7 +22,13 @@ sub choose {
   $_[0]->_ketama->hash($_[1])
 }
 
-sub serialize { encode_json( $_[0]->_orig_continuum_spec ) }
+# FIXME losing logger
+sub serialize {
+  my $self = shift;
+  my $logger = $self->{logger};
+  $logger->debug("Serializing continuum, this will lose the logger!") if $logger;
+  encode_json( $self->_orig_continuum_spec )
+}
 
 sub deserialize {
   my $class = shift;
@@ -31,7 +37,9 @@ sub deserialize {
 
 sub clone {
   my $self = shift;
-  return ref($self)->new(from => $self->_orig_continuum_spec);
+  my $clone = ref($self)->new(from => $self->_orig_continuum_spec);
+  $clone->{logger} = $self->{logger};
+  return $clone;
 }
 
 sub extend {
@@ -74,7 +82,8 @@ sub _make_ketama {
   my $spec = shift;
   my $ketama = Algorithm::ConsistentHash::Ketama->new;
   Carp::croak("Ketama spec must be an Array of Arrays, each inner record holding key and weight! This is not an array")
-    if not ref($spec) eq 'ARRAY';
+    if not ref($spec) eq 'ARRAY'
+    or @$spec == 0;
   foreach my $elem (@$spec) {
     Carp::croak("Ketama spec must be an Array of Arrays, each inner record "
                 . "holding key and weight! This particular record is not an array or does not hold two elements")
@@ -97,7 +106,7 @@ ShardedKV::Continuum::Ketama - Continuum implementation based on ketama consiste
 
 =head1 VERSION
 
-version 0.11
+version 0.12
 
 =head1 SYNOPSIS
 

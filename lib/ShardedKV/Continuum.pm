@@ -1,9 +1,11 @@
 package ShardedKV::Continuum;
 {
-  $ShardedKV::Continuum::VERSION = '0.11';
+  $ShardedKV::Continuum::VERSION = '0.12';
 }
 use Moose::Role;
 # ABSTRACT: The continuum role
+
+with 'ShardedKV::HasLogger';
 
 
 requires qw(
@@ -29,7 +31,7 @@ ShardedKV::Continuum - The continuum role
 
 =head1 VERSION
 
-version 0.11
+version 0.12
 
 =head1 SYNOPSIS
 
