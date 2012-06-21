@@ -1,6 +1,6 @@
 package ShardedKV::Storage::MySQL;
 {
-  $ShardedKV::Storage::MySQL::VERSION = '0.12';
+  $ShardedKV::Storage::MySQL::VERSION = '0.13';
 }
 use Moose;
 # ABSTRACT: MySQL storage backend for ShardedKV
@@ -206,6 +206,7 @@ sub _make_delete_query {
   return $q;
 }
 
+
 sub prepare_table {
   my $self = shift;
   $self->_number_of_params; # prepopulate
@@ -250,6 +251,7 @@ sub prepare_table {
   $self->get_master_dbh->do($q);
 }
 
+
 # Might not reconnect if the mysql_master_connector code ref just returns
 # a cached connection.
 sub refresh_connection {
@@ -261,6 +263,7 @@ sub refresh_connection {
   delete $self->{_mysql_connection};
   return $self->_mysql_connection;
 }
+
 
 sub get_master_dbh {
   my $self = shift;
@@ -339,7 +342,7 @@ ShardedKV::Storage::MySQL - MySQL storage backend for ShardedKV
 
 =head1 VERSION
 
-version 0.12
+version 0.13
 
 =head1 SYNOPSIS
 
@@ -472,6 +475,24 @@ Can also be fractional seconds.
 This is the private attribute holding a MySQL database handle (which was
 created using the C<mysql_master_connector>). Do not supply this at object
 creation.
+
+=head1 PUBLIC METHODS
+
+=head2 prepare_table
+
+This method will generate a C<CREATE TABLE> statement from the
+various properties of the storage object and execute it on the MySQL
+server to prepare the shard table.
+
+=head2 refresh_connection
+
+Explicitly drops the MySQL connection object and calls back into
+the provided connect handler to get a new connection.
+
+=head2 get_master_dbh
+
+Returns the MySQL master database handle that is in use by the
+ShardedKV storage object.
 
 =head1 SEE ALSO
 

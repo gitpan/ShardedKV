@@ -20,7 +20,7 @@ my %WriteMakefileArgs = (
   "LICENSE" => "perl",
   "NAME" => "ShardedKV",
   "PREREQ_PM" => {
-    "Algorithm::ConsistentHash::Ketama" => 0,
+    "Algorithm::ConsistentHash::Ketama" => "0.00008",
     "Array::IntSpan" => 0,
     "Carp" => 0,
     "DBD::mysql" => 0,
@@ -35,7 +35,7 @@ my %WriteMakefileArgs = (
     "Test::More" => "0.88",
     "parent" => 0
   },
-  "VERSION" => "0.12",
+  "VERSION" => "0.13",
   "test" => {
     "TESTS" => "t/*.t"
   }

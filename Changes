@@ -1,5 +1,10 @@
 Revision history for Perl extension Foo.
 
+0.13      2012-06-21 15:42:42 Europe/Berlin
+
+  - More documentation
+  - Require Algorithm::ConsistentHash::Ketama 0.00008
+
 0.12      2012-05-18 10:24:36 Europe/Berlin
 
   - MySQL storage order of initialization bug fix.

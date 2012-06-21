@@ -14,7 +14,7 @@ meta-spec:
   version: 1.4
 name: ShardedKV
 requires:
-  Algorithm::ConsistentHash::Ketama: 0
+  Algorithm::ConsistentHash::Ketama: 0.00008
   Array::IntSpan: 0
   Carp: 0
   DBD::mysql: 0
@@ -30,4 +30,4 @@ requires:
   parent: 0
 resources:
   repository: http://github.com/tsee/p5-ShardedKV
-version: 0.12
+version: 0.13
