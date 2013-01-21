@@ -1,6 +1,6 @@
 package ShardedKV;
 {
-  $ShardedKV::VERSION = '0.13';
+  $ShardedKV::VERSION = '0.14';
 }
 use Moose;
 # ABSTRACT: An interface to sharded key-value stores
@@ -161,7 +161,7 @@ ShardedKV - An interface to sharded key-value stores
 
 =head1 VERSION
 
-version 0.13
+version 0.14
 
 =head1 SYNOPSIS
 
@@ -179,12 +179,10 @@ version 0.13
   # "Memory" is for testing. Mixing storages likely has weird side effects.
   my %storages = (
     shard1 => ShardedKV::Storage::Redis->new(
-      redis_master_str => 'redisserver:6379',
-      redis_slave_strs => ['redisbackup:6379', 'redisbackup2:6379'],
+      redis_connect_str => 'redisserver:6379',
     ),
     shard2 => ShardedKV::Storage::Redis->new(
-      redis_master_str => 'redisserver:6380',
-      redis_slave_strs => ['redisbackup:6380', 'redisbackup2:6380'],
+      redis_connect_str => 'redisserver:6380',
     ),
   );
   
@@ -370,11 +368,11 @@ Full migration example:
   # "Memory" is for testing. Mixing storages likely has weird side effects.
   my %storages = (
     shard1 => ShardedKV::Storage::Redis->new(
-      redis_master_str => 'redisserver:6379',
+      redis_connect_str => 'redisserver:6379',
       expiration_time => 60*60,
     ),
     shard2 => ShardedKV::Storage::Redis->new(
-      redis_master_str => 'redisserver:6380',
+      redis_connect_str => 'redisserver:6380',
       expiration_time => 60*60,
     ),
   );
@@ -388,7 +386,7 @@ Full migration example:
   # Oh, we need to extend it!
   # Add storages:
   $skv->storages->{shard3} = ShardedKV::Storage::Redis->new(
-    redis_master_str => 'NEWredisserver:6379',
+    redis_connect_str => 'NEWredisserver:6379',
     expiration_time => 60*60,
   );
   # ... could add more at the same time...
@@ -501,7 +499,7 @@ Nick Perez <nperez@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2012 by Steffen Mueller.
+This software is copyright (c) 2013 by Steffen Mueller.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

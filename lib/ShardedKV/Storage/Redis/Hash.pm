@@ -1,21 +1,37 @@
 package ShardedKV::Storage::Redis::Hash;
 {
-  $ShardedKV::Storage::Redis::Hash::VERSION = '0.13';
+  $ShardedKV::Storage::Redis::Hash::VERSION = '0.14';
 }
 use Moose;
 # ABSTRACT: Storing hash values in Redis
-use parent 'ShardedKV::Storage::Redis';
 use Encode;
 use Redis;
 use Carp ();
+use ShardedKV::Error::ReadFail;
+use ShardedKV::Error::WriteFail;
+
+extends 'ShardedKV::Storage::Redis';
 
 sub get {
   my ($self, $key) = @_;
-  # fetch from master by default (TODO revisit later)
-  my $master = $self->redis_master;
-  my %hash = $master->hgetall($key);
-  #Encode::_utf8_on($$vref); # FIXME wrong, wrong, wrong, but Redis.pm would otherwise call encode() all the time
-  return keys(%hash) ? \%hash : undef;
+  my $redis = $self->redis;
+  my $hash;
+  eval {
+    my %foo = $redis->hgetall($key);
+    if(keys %foo) {
+      $hash = \%foo;
+    }
+    1;
+  } or do {
+    my $endpoint = $self->redis_connect_str;
+    ShardedKV::Error::ReadFail->throw({
+      endpoint => $endpoint,
+      key => $key,
+      storage_type => 'redis',
+      message => "Failed to fetch key ($key) from Redis ($endpoint): @_",
+    });
+  };
+  return $hash;
 }
 
 sub set {
@@ -24,14 +40,38 @@ sub set {
     Carp::croak("Value must be a hashref");
   }
 
-  my $r = $self->redis_master;
-  my $rv = $r->hmset($key, %$value_ref);
+  my $r = $self->redis;
+
+  my $rv = eval {
+    $r->hmset($key, %$value_ref);
+  } or do {
+    my $endpoint = $self->redis_connect_str;
+    ShardedKV::Error::WriteFail->throw({
+      endpoint => $endpoint,
+      key => $key,
+      storage_type => 'redis',
+      operation => 'set',
+      message => "Failed to store key ($key) to Redis ($endpoint): @_",
+    });
+  };
 
   my $expire = $self->expiration_time;
   if (defined $expire) {
-    $r->pexpire(
-      $key, int(1000*($expire+rand($self->expiration_time_jitter)))
-    );
+    eval {
+      $r->pexpire(
+        $key, int(1000*($expire+rand($self->expiration_time_jitter)))
+      );
+      1;
+    } or do {
+      my $endpoint = $self->redis_connect_str;
+      ShardedKV::Error::WriteFail->throw({
+        endpoint => $endpoint,
+        key => $key,
+        storage_type => 'redis',
+        operation => 'expire',
+        message => "Failed to store key ($key) to Redis ($endpoint): @_",
+      });
+    };
   }
 
   return $rv;
@@ -50,7 +90,7 @@ ShardedKV::Storage::Redis::Hash - Storing hash values in Redis
 
 =head1 VERSION
 
-version 0.13
+version 0.14
 
 =head1 SYNOPSIS
 
@@ -58,7 +98,7 @@ version 0.13
   use ShardedKV::Storage::Redis::Hash;
   ... create ShardedKV...
   my $storage = ShardedKV::Storage::Redis::Hash->new(
-    redis_master_str => 'redisshard1:679',
+    redis_connect_str => 'redisshard1:679',
     expiration_time => 60*60, #1h
   );
   ... put storage into ShardedKV...
@@ -115,7 +155,7 @@ Nick Perez <nperez@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2012 by Steffen Mueller.
+This software is copyright (c) 2013 by Steffen Mueller.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
@@ -125,3 +165,4 @@ the same terms as the Perl 5 programming language system itself.
 
 __END__
 
+# vim: ts=2 sw=2 et

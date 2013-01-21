@@ -1,6 +1,6 @@
 package ShardedKV::Storage::Redis;
 {
-  $ShardedKV::Storage::Redis::VERSION = '0.13';
+  $ShardedKV::Storage::Redis::VERSION = '0.14';
 }
 use Moose;
 # ABSTRACT: Abstract base class for storing k/v pairs in Redis
@@ -8,43 +8,36 @@ use Moose;
 use Encode;
 use Redis;
 use List::Util qw(shuffle);
+use ShardedKV::Error::ConnectFail;
 
 with 'ShardedKV::Storage';
 
 
-has 'redis_master_str' => (
+has 'redis_connect_str' => (
   is => 'ro',
   isa => 'Str',
   required => 1,
 );
 
 
-# For either failover or reading => TODO might make sense to separate the two
-has 'redis_slave_strs' => (
-  is => 'ro',
-  isa => 'ArrayRef[Str]',
-  required => 1,
-  default => sub {[]},
-);
-
-
-has 'redis_master' => (
+has 'redis' => (
   is => 'rw',
   isa => 'Redis',
   lazy => 1,
-  builder => '_make_master_conn',
+  builder => '_make_connection',
+  clearer => '_clear_connection',
 );
 
 
 has 'expiration_time' => ( # in seconds
   is => 'rw',
-  #isa => 'Num',
+  isa => 'Num',
 );
 
 
 has 'expiration_time_jitter' => ( # in seconds
   is => 'rw',
-  #isa => 'Num',
+  isa => 'Num',
   default => 0,
 );
 
@@ -52,48 +45,37 @@ has 'expiration_time_jitter' => ( # in seconds
 
 has 'database_number' => (
   is => 'rw',
-  # isa => 'Int',
+  isa => 'Int',
   trigger => sub {
     my $self = shift;
-    $self->{database_number} = shift;
-    if (defined $self->{redis_master}) {
-      $self->redis_master->select($self->{database_number});
-    }
+    $self->redis->select(shift);
   },
 );
 
 sub _make_connection {
-  my ($self, $endpoint) = @_;
-  my $r = Redis->new( # dies if it can't connect!
-    server => $endpoint,
-    encoding => undef, # no automatic utf8 encoding for performance
-  );
+  my ($self) = @_;
+  my $endpoint = $self->redis_connect_str;
+  my $r = eval {
+      Redis->new( # dies if it can't connect!
+      server => $endpoint,
+      encoding => undef, # no automatic utf8 encoding for performance
+    );
+  } or do {
+    ShardedKV::Error::ConnectFail->throw({
+      endpoint => $endpoint,
+      storage_type => 'redis',
+      message => "Failed to make a connection to Redis ($endpoint)",
+    });
+  };
   my $dbno = $self->database_number;
   $r->select($dbno) if defined $dbno;
   return $r;
 }
 
-sub _make_master_conn {
-  my $self = shift;
-  return $self->_make_connection($self->redis_master_str);
-}
-
-sub _make_slave_conn {
-  my $self = shift;
-  my $conn;
-  foreach my $slave (shuffle(@{$self->redis_slave_strs})) {
-    last if eval {
-      $conn = $self->_make_connection($slave);
-    };
-  }
-  die if not $conn;
-  return $conn;
-}
-
 
 sub delete {
   my ($self, $key) = @_;
-  return $self->redis_master->del($key);
+  return $self->redis->del($key);
 }
 
 
@@ -101,6 +83,11 @@ sub get { die "Method get() not implemented in abstract base class" }
 
 
 sub set { die "Method set() not implemented in abstract base class" }
+
+sub reset_connection {
+  my ($self) = @_;
+  $self->_clear_connection();
+}
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
@@ -115,7 +102,7 @@ ShardedKV::Storage::Redis - Abstract base class for storing k/v pairs in Redis
 
 =head1 VERSION
 
-version 0.13
+version 0.14
 
 =head1 SYNOPSIS
 
@@ -131,22 +118,15 @@ storages for distinct Redis value types.
 
 =head1 PUBLIC ATTRIBUTES
 
-=head2 redis_master_str
+=head2 redis_connect_str
 
-A hostname:port string pointing at the Redis master for this shard.
+A hostname:port string pointing at the Redis for this shard.
 Required.
 
-=head2 redis_slave_strs
+=head2 redis
 
-Array reference of hostname:port strings representing Redis slaves
-of the master. Currently unused, will eventually be used for either
-reading or master failover.
-
-=head2 redis_master
-
-The C<Redis> object that represents the master connection. Will be
-generated from the C<redis_master_str> attribute and may be reset/reconnected
-at any time.
+The C<Redis> object that represents the connection. Will be generated from the
+C<redis_connect_str> attribute and may be reset/reconnected at any time.
 
 =head2 expiration_time
 
@@ -209,6 +189,8 @@ L<ShardedKV::Storage::Redis::Hash>
 
 L<Redis>
 
+# vim: ts=2 sw=2 et
+
 =back
 
 =head1 AUTHORS
@@ -227,7 +209,7 @@ Nick Perez <nperez@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2012 by Steffen Mueller.
+This software is copyright (c) 2013 by Steffen Mueller.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

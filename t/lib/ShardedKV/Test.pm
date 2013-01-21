@@ -43,6 +43,10 @@ SCOPE: { # mysql
     return();
   }
 
+  sub mysql_endpoint {
+    return $mysql_connect_args[0];
+  }
+
   my $shared_connection;
   sub mysql_connect_hook {
     require DBI;
@@ -64,7 +68,8 @@ SCOPE: { # mysql
     # We set the col types since the timestamp will not roundtrip
     # nicely as a string
     my $st = ShardedKV::Storage::MySQL->new(
-      mysql_master_connector => \&mysql_connect_hook,
+      mysql_connector => \&mysql_connect_hook,
+      mysql_endpoint => \&mysql_endpoint,
       table_name => $table_name,
       value_col_names => [qw(val last_change)],
       value_col_types => ['MEDIUMBLOB NOT NULL', 'INTEGER UNSIGNED NOT NULL'],
@@ -101,7 +106,7 @@ SCOPE: { # redis
     $idatabase ||= 0;
     note("Setting connection to Redis db number $idatabase");
     my $st = ShardedKV::Storage::Redis::String->new(
-      redis_master_str => get_redis_conf(),
+      redis_connect_str => get_redis_conf(),
       database_number => $idatabase,
       expiration_time => 30, # 30s
     );
@@ -113,7 +118,7 @@ SCOPE: { # redis
     $idatabase ||= 0;
     note("Setting connection to Redis db number $idatabase");
     my $st = ShardedKV::Storage::Redis::Hash->new(
-      redis_master_str => get_redis_conf(),
+      redis_connect_str => get_redis_conf(),
       database_number => $idatabase,
       expiration_time => 30, # 30s
     );

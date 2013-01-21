@@ -1,6 +1,6 @@
 package ShardedKV::Storage::Memory;
 {
-  $ShardedKV::Storage::Memory::VERSION = '0.13';
+  $ShardedKV::Storage::Memory::VERSION = '0.14';
 }
 use Moose;
 # ABSTRACT: Testing storage backend for in-memory storage
@@ -30,6 +30,9 @@ sub delete {
   return();
 }
 
+# This is a noop for the Memory storage
+sub reset_connection { }
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
@@ -43,7 +46,7 @@ ShardedKV::Storage::Memory - Testing storage backend for in-memory storage
 
 =head1 VERSION
 
-version 0.13
+version 0.14
 
 =head1 SYNOPSIS
 
@@ -86,7 +89,7 @@ Nick Perez <nperez@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2012 by Steffen Mueller.
+This software is copyright (c) 2013 by Steffen Mueller.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
@@ -96,3 +99,5 @@ the same terms as the Perl 5 programming language system itself.
 
 __END__
 
+
+# vim: ts=2 sw=2 et

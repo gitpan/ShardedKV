@@ -1,6 +1,6 @@
 package ShardedKV::Storage::MySQL;
 {
-  $ShardedKV::Storage::MySQL::VERSION = '0.13';
+  $ShardedKV::Storage::MySQL::VERSION = '0.14';
 }
 use Moose;
 # ABSTRACT: MySQL storage backend for ShardedKV
@@ -11,8 +11,15 @@ use Carp ();
 with 'ShardedKV::Storage';
 
 
-has 'mysql_master_connector' => (
-  is => 'rw',
+has 'mysql_connector' => (
+  is => 'ro',
+  isa => 'CodeRef',
+  required => 1,
+);
+
+
+has 'mysql_endpoint' => (
+  is => 'ro',
   isa => 'CodeRef',
   required => 1,
 );
@@ -24,26 +31,34 @@ has 'mysql_master_connector' => (
 # above which needs to know how to obtain a new or existing connection.
 # This means that we can make each Storage::MySQL object be specific to
 # a particular table!
-has '_mysql_connection' => (
+has 'mysql_connection' => (
   is => 'rw',
   lazy => 1,
-  builder => '_make_master_conn',
+  builder => 'build_mysql_connection',
+  clearer => 'clear_mysql_connection',
+  predicate => 'has_mysql_connection',
 );
 
 
-sub _make_master_conn {
+sub build_mysql_connection {
   my $self = shift;
   my $logger = $self->logger;
-  $logger->debug("Getting master connection") if $logger;
-  my $dbh = $self->mysql_master_connector->();
+  $logger->debug("Getting mysql connection") if $logger;
+  my $dbh = $self->mysql_connector->();
   if ($dbh) {
-    $logger->debug("Get master connection") if $logger;
+    $logger->debug("Get connection") if $logger;
     $dbh->{RaiseError} = 1;
     $dbh->{PrintError} = 0;
     #$dbh->{AutoCommit} = 1;
   }
   else {
-    $logger->warn("Failed to get master connection") if $logger;
+    my $endpoint = $self->mysql_endpoint->();
+    ShardedKV::Error::ConnectFail->throw({
+      endpoint => $endpoint,
+      storage_type => 'mysql',
+      message => "Failed to make a connection to MySQL ($endpoint)",
+    });
+    $logger->warn("Failed to get connection") if $logger;
   }
   return $dbh;
 }
@@ -166,7 +181,7 @@ sub _make_get_query {
   my $v_col_str = join ',', @$v_cols;
   my $q = qq{SELECT $v_col_str FROM $tbl WHERE $key_col = ? LIMIT 1};
 
-  my $logger = $self->{logger};
+  my $logger = $self->logger;
   $logger->debug("Generated the following get-query:\n$q") if $logger;
 
   return $q;
@@ -187,7 +202,7 @@ sub _make_set_query {
     $vcol_assign_str
   };
 
-  my $logger = $self->{logger};
+  my $logger = $self->logger;
   $logger->debug("Generated the following set-query:\n$q") if $logger;
 
   return $q;
@@ -248,35 +263,20 @@ sub prepare_table {
   my $logger = $self->logger;
   $logger->info("Creating shard storage table:\n$q") if $logger;
 
-  $self->get_master_dbh->do($q);
+  $self->mysql_connection->do($q);
 }
 
 
-# Might not reconnect if the mysql_master_connector code ref just returns
+# Might not reconnect if the mysql_connector code ref just returns
 # a cached connection.
 sub refresh_connection {
   my $self = shift;
 
-  my $logger = $self->{logger};
+  my $logger = $self->logger;
   $logger->info("Refreshing mysql connection") if $logger;
 
-  delete $self->{_mysql_connection};
-  return $self->_mysql_connection;
-}
-
-
-sub get_master_dbh {
-  my $self = shift;
-  # fetch from master by default (TODO revisit later)
-  my $master_dbh = $self->_mysql_connection;
-  if (not defined $master_dbh) {
-    $master_dbh = $self->refresh_connection;
-  }
-  if (not defined $master_dbh) {
-    die "Failed to get connection to mysql!";
-  }
-
-  return $master_dbh;
+  $self->clear_mysql_connection;
+  return $self->mysql_connection;
 }
 
 sub _run_sql {
@@ -285,7 +285,7 @@ sub _run_sql {
   my $iconn;
   my $rv;
   while (1) {
-    my $dbh = $self->get_master_dbh;
+    my $dbh = $self->mysql_connection;
     eval {
       $rv = $dbh->$method($query, @args);
       1
@@ -309,7 +309,19 @@ sub _run_sql {
 
 sub get {
   my ($self, $key) = @_;
-  my $rv = $self->_run_sql('selectall_arrayref', $self->_get_query, undef, $key);
+  my $rv;
+  eval {
+    $rv = $self->_run_sql('selectall_arrayref', $self->_get_query, undef, $key);
+    1;
+  } or do {
+    my $endpoint = $self->mysql_endpoint->();
+    ShardedKV::Error::ReadFail->throw({
+      endpoint => $endpoint,
+      key => $key,
+      storage_type => 'mysql',
+      message => "Failed to fetch key ($key) from Redis ($endpoint): @_",
+    });
+  };
   return ref($rv) ? $rv->[0] : undef;
 }
 
@@ -318,8 +330,20 @@ sub set {
 
   Carp::croak("Need exactly " . ($self->{_number_of_params}-1) . " values, got " . scalar(@$value_ref))
     if not scalar(@$value_ref) == $self->_number_of_params-1;
-
-  my $rv = $self->_run_sql('do', $self->_set_query, undef, $key, @$value_ref);
+  
+  my $rv;
+  eval {
+    $rv = $self->_run_sql('do', $self->_set_query, undef, $key, @$value_ref);
+    1;
+  } or do {
+    my $endpoint = $self->mysql_endpoint->();
+    ShardedKV::Error::ReadFail->throw({
+      endpoint => $endpoint,
+      key => $key,
+      storage_type => 'mysql',
+      message => "Failed to fetch key ($key) from Redis ($endpoint): @_",
+    });
+  };
   return $rv ? 1 : 0;
 }
 
@@ -327,6 +351,11 @@ sub delete {
   my ($self, $key) = @_;
   my $rv = $self->_run_sql('do', $self->_delete_query, undef, $key);
   return $rv ? 1 : 0;
+}
+
+sub reset_connection {
+  my ($self) = @_;
+  $self->_clear_connection();
 }
 
 no Moose;
@@ -342,7 +371,7 @@ ShardedKV::Storage::MySQL - MySQL storage backend for ShardedKV
 
 =head1 VERSION
 
-version 0.13
+version 0.14
 
 =head1 SYNOPSIS
 
@@ -369,7 +398,7 @@ single table in some schema on some database server.
 
 =head1 PUBLIC ATTRIBUTES
 
-=head2 mysql_master_connector
+=head2 mysql_connector
 
 A callback that must be supplied at object creation time. The storage
 object will invoke the callback whenever it needs to get a NEW mysql
@@ -382,6 +411,21 @@ The callback allows users to hook into the connection logic to implement
 things such as connection caching. If you do use connection caching, then
 do assert that the dbh is alive (eg. using C<$dbh-E<gt>ping()> before
 returning a cached connection.
+
+=head2 mysql_endpoint
+
+A callback that should return a unique string that represents the endpoint. In
+most cases this should be a hostname to allow for debugging connection issues.
+
+The callback allows users to hook into the connection logic and update the
+string that represents the particular endpoint that this storage instance
+represents.
+
+=head2 mysql_connection
+
+This is the public attribute holding a MySQL database handle (which was
+created using the C<mysql_connector>). Do not supply this at object
+creation.
 
 =head2 table_name
 
@@ -468,14 +512,6 @@ Default: 1 second
 
 Can also be fractional seconds.
 
-=head1 PRIVATE ATTRIBUTES
-
-=head2 _mysql_connection
-
-This is the private attribute holding a MySQL database handle (which was
-created using the C<mysql_master_connector>). Do not supply this at object
-creation.
-
 =head1 PUBLIC METHODS
 
 =head2 prepare_table
@@ -488,11 +524,6 @@ server to prepare the shard table.
 
 Explicitly drops the MySQL connection object and calls back into
 the provided connect handler to get a new connection.
-
-=head2 get_master_dbh
-
-Returns the MySQL master database handle that is in use by the
-ShardedKV storage object.
 
 =head1 SEE ALSO
 
@@ -532,7 +563,7 @@ Nick Perez <nperez@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2012 by Steffen Mueller.
+This software is copyright (c) 2013 by Steffen Mueller.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
@@ -542,3 +573,4 @@ the same terms as the Perl 5 programming language system itself.
 
 __END__
 
+# vim: ts=2 sw=2 et

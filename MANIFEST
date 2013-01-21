@@ -14,6 +14,10 @@ lib/ShardedKV.pm
 lib/ShardedKV/Continuum.pm
 lib/ShardedKV/Continuum/Ketama.pm
 lib/ShardedKV/Continuum/StaticMapping.pm
+lib/ShardedKV/Error.pm
+lib/ShardedKV/Error/ConnectFail.pm
+lib/ShardedKV/Error/ReadFail.pm
+lib/ShardedKV/Error/WriteFail.pm
 lib/ShardedKV/HasLogger.pm
 lib/ShardedKV/Storage.pm
 lib/ShardedKV/Storage/Memory.pm
