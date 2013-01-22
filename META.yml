@@ -27,7 +27,8 @@ requires:
   POSIX: 0
   Redis: 0
   Test::More: 0.88
+  Throwable: 0
   parent: 0
 resources:
   repository: http://github.com/tsee/p5-ShardedKV
-version: 0.14
+version: 0.15

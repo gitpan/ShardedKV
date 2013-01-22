@@ -1,6 +1,6 @@
 package ShardedKV::Error::ReadFail;
 {
-  $ShardedKV::Error::ReadFail::VERSION = '0.14';
+  $ShardedKV::Error::ReadFail::VERSION = '0.15';
 }
 use Moose;
 extends 'ShardedKV::Error';
@@ -28,7 +28,7 @@ ShardedKV::Error::ReadFail - Thrown when get() fails on a storage backend
 
 =head1 VERSION
 
-version 0.14
+version 0.15
 
 =head1 DESCRIPTION
 

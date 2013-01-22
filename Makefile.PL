@@ -33,9 +33,10 @@ my %WriteMakefileArgs = (
     "POSIX" => 0,
     "Redis" => 0,
     "Test::More" => "0.88",
+    "Throwable" => 0,
     "parent" => 0
   },
-  "VERSION" => "0.14",
+  "VERSION" => "0.15",
   "test" => {
     "TESTS" => "t/*.t"
   }

@@ -1,6 +1,6 @@
 package ShardedKV::Error::WriteFail;
 {
-  $ShardedKV::Error::WriteFail::VERSION = '0.14';
+  $ShardedKV::Error::WriteFail::VERSION = '0.15';
 }
 use Moose;
 extends 'ShardedKV::Error';
@@ -36,7 +36,7 @@ ShardedKV::Error::WriteFail - Thrown when set() fails on a storage backend
 
 =head1 VERSION
 
-version 0.14
+version 0.15
 
 =head1 DESCRIPTION
 

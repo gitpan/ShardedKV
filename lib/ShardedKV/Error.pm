@@ -1,6 +1,6 @@
 package ShardedKV::Error;
 {
-  $ShardedKV::Error::VERSION = '0.14';
+  $ShardedKV::Error::VERSION = '0.15';
 }
 use Moose;
 extends 'Throwable::Error';
@@ -34,7 +34,7 @@ ShardedKV::Error - Provides an error class for managing exceptions
 
 =head1 VERSION
 
-version 0.14
+version 0.15
 
 =head1 DESCRIPTION
 
