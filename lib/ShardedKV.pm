@@ -1,6 +1,6 @@
 package ShardedKV;
 {
-  $ShardedKV::VERSION = '0.15';
+  $ShardedKV::VERSION = '0.16';
 }
 use Moose;
 # ABSTRACT: An interface to sharded key-value stores
@@ -124,6 +124,40 @@ sub delete {
 }
 
 
+sub reset_connection {
+  my ($self, $key) = @_;
+
+  my ($mig_cont, $cont) = @{$self}{qw(migration_continuum continuum)};
+
+  # dumb code for efficiency (otherwise, this would be a loop or in methods)
+
+  my $logger = $self->{logger};
+  my $do_debug = ($logger and $logger->is_debug) ? 1 : 0;
+
+  my $storages = $self->{storages};
+  my $chosen_shard;
+  # Reset the shard pointed at by migr. cont. first
+  if (defined $mig_cont) {
+    $chosen_shard = $mig_cont->choose($key);
+    $logger->debug("Resetting the connection to the shard from migration continuum, got storage '$chosen_shard'") if $do_debug;
+    my $storage = $storages->{ $chosen_shard };
+    die "Failed to find chosen storage (server) for id '$chosen_shard' via key '$key'"
+      if not $storage;
+    $storage->reset_connection();
+  }
+
+  # Reset the shard from the main continuum
+  my $where = $cont->choose($key);
+  $logger->debug("Resetting the connection to the shard from the main continuum, got storage '$where'") if $do_debug;
+  if (!$chosen_shard or $where ne $chosen_shard) {
+    my $storage = $storages->{ $where };
+    die "Failed to find chosen storage (server) for id '$where' via key '$key'"
+      if not $storage;
+    $storage->reset_connection();
+  }
+}
+
+
 sub begin_migration {
   my ($self, $migration_continuum) = @_;
 
@@ -161,7 +195,7 @@ ShardedKV - An interface to sharded key-value stores
 
 =head1 VERSION
 
-version 0.15
+version 0.16
 
 =head1 SYNOPSIS
 
@@ -338,6 +372,13 @@ Given a key, deletes the key's entry from the correct shard.
 In a migration situation, this might attempt to delete the key from
 multiple shards, see below.
 
+=head2 reset_connection
+
+Given a key, it retrieves to which shard it would have communicated and calls
+reset_connection() upon it. This allows doing a reconnect only for the shards
+that have problems. If there is a migration_continuum it will also reset the
+connection to that shard as well in an abundance of caution.
+
 =head2 begin_migration
 
 Given a C<ShardedKV::Continuum> object, this sets the
@@ -509,3 +550,4 @@ the same terms as the Perl 5 programming language system itself.
 
 __END__
 
+# vim: ts=2 sw=2 et

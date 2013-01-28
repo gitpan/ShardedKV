@@ -1,6 +1,6 @@
 package ShardedKV::Error::ConnectFail;
 {
-  $ShardedKV::Error::ConnectFail::VERSION = '0.15';
+  $ShardedKV::Error::ConnectFail::VERSION = '0.16';
 }
 use Moose;
 extends 'ShardedKV::Error';
@@ -20,7 +20,7 @@ ShardedKV::Error::ConnectFail - Thrown when connection exceptions occur.
 
 =head1 VERSION
 
-version 0.15
+version 0.16
 
 =head1 DESCRIPTION
 

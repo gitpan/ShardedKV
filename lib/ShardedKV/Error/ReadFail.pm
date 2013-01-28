@@ -1,6 +1,6 @@
 package ShardedKV::Error::ReadFail;
 {
-  $ShardedKV::Error::ReadFail::VERSION = '0.15';
+  $ShardedKV::Error::ReadFail::VERSION = '0.16';
 }
 use Moose;
 extends 'ShardedKV::Error';
@@ -28,7 +28,7 @@ ShardedKV::Error::ReadFail - Thrown when get() fails on a storage backend
 
 =head1 VERSION
 
-version 0.15
+version 0.16
 
 =head1 DESCRIPTION
 
@@ -36,7 +36,9 @@ ShardedKV::Error::ReadFail is an exception thrown when there is a problem
 reading from a particular storage backend. The exception will contain which key
 failed.
 
-=public_attribute key
+=head1 PUBLIC ATTRIBUTES
+
+=head2 key
 
   (is: ro, isa: Str, required)
 

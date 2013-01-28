@@ -1,6 +1,6 @@
 package ShardedKV::Error::WriteFail;
 {
-  $ShardedKV::Error::WriteFail::VERSION = '0.15';
+  $ShardedKV::Error::WriteFail::VERSION = '0.16';
 }
 use Moose;
 extends 'ShardedKV::Error';
@@ -36,7 +36,7 @@ ShardedKV::Error::WriteFail - Thrown when set() fails on a storage backend
 
 =head1 VERSION
 
-version 0.15
+version 0.16
 
 =head1 DESCRIPTION
 
@@ -44,13 +44,15 @@ ShardedKV::Error::WriteFail is an exception thrown when there is a problem
 writing to the particular storage backend. The exception will contain which key
 failed, and potentially which operation during the set() failed.
 
-=public_attribute key
+=head1 PUBLIC ATTRIBUTES
+
+=head2 key
 
   (is: ro, isa: Str, required)
 
 key holds what particular key was used for the set() call.
 
-=public_attribute operation
+=head2 operation
 
   (is: ro, isa: enum(set, expire))
 
@@ -60,7 +62,9 @@ separate from the actual set operation. In those two cases, this attribute will
 be set with the appropriate operation. Other backends may or may not supply
 this value.
 
-=public_method has_operation
+=head1 PUBLIC METHODS
+
+=head2 has_operation
 
 has_operation() is the predicate check for the L</operation> attribute. It
 checks if operation is defined (ie. the backend set a value).

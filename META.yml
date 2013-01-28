@@ -31,4 +31,4 @@ requires:
   parent: 0
 resources:
   repository: http://github.com/tsee/p5-ShardedKV
-version: 0.15
+version: 0.16
