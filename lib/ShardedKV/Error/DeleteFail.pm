@@ -1,11 +1,11 @@
-package ShardedKV::Error::ReadFail;
+package ShardedKV::Error::DeleteFail;
 {
-  $ShardedKV::Error::ReadFail::VERSION = '0.17';
+  $ShardedKV::Error::DeleteFail::VERSION = '0.17';
 }
 use Moose;
 extends 'ShardedKV::Error';
 
-#ABSTRACT: Thrown when get() fails on a storage backend
+#ABSTRACT: Thrown when delete() fails on a storage backend
 
 
 
@@ -24,7 +24,7 @@ __PACKAGE__->meta->make_immutable(inline_constructor => 0);
 
 =head1 NAME
 
-ShardedKV::Error::ReadFail - Thrown when get() fails on a storage backend
+ShardedKV::Error::DeleteFail - Thrown when delete() fails on a storage backend
 
 =head1 VERSION
 
@@ -32,9 +32,9 @@ version 0.17
 
 =head1 DESCRIPTION
 
-ShardedKV::Error::ReadFail is an exception thrown when there is a problem
-reading from a particular storage backend. The exception will contain which key
-failed.
+ShardedKV::Error::DeleteFail is an exception thrown when there is a problem
+deleting a key from a particular storage backend. The exception will contain
+which key failed.
 
 =head1 PUBLIC ATTRIBUTES
 
@@ -42,7 +42,7 @@ failed.
 
   (is: ro, isa: Str, required)
 
-key holds what particular key was used for the get() call.
+key holds what particular key was used for the delete() call.
 
 =head1 AUTHORS
 

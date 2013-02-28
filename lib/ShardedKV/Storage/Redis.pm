@@ -1,6 +1,6 @@
 package ShardedKV::Storage::Redis;
 {
-  $ShardedKV::Storage::Redis::VERSION = '0.16';
+  $ShardedKV::Storage::Redis::VERSION = '0.17';
 }
 use Moose;
 # ABSTRACT: Abstract base class for storing k/v pairs in Redis
@@ -64,7 +64,7 @@ sub _make_connection {
     ShardedKV::Error::ConnectFail->throw({
       endpoint => $endpoint,
       storage_type => 'redis',
-      message => "Failed to make a connection to Redis ($endpoint)",
+      message => "Failed to make a connection to Redis ($endpoint): $@",
     });
   };
   my $dbno = $self->database_number;
@@ -75,7 +75,20 @@ sub _make_connection {
 
 sub delete {
   my ($self, $key) = @_;
-  return $self->redis->del($key);
+  my $rv;
+  eval {
+    $rv = $self->redis->del($key);
+    1;
+  } or do {
+    my $endpoint = $self->redis_connect_str;
+    ShardedKV::Error::DeleteFail->throw({
+      endpoint => $endpoint,
+      key => $key,
+      storage_type => 'redis',
+      message => "Failed to delete key ($key) to Redis ($endpoint): $@",
+    });
+  };
+  return $rv ? 1 : 0;
 }
 
 
@@ -102,7 +115,7 @@ ShardedKV::Storage::Redis - Abstract base class for storing k/v pairs in Redis
 
 =head1 VERSION
 
-version 0.16
+version 0.17
 
 =head1 SYNOPSIS
 

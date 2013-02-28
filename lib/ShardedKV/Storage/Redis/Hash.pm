@@ -1,6 +1,6 @@
 package ShardedKV::Storage::Redis::Hash;
 {
-  $ShardedKV::Storage::Redis::Hash::VERSION = '0.16';
+  $ShardedKV::Storage::Redis::Hash::VERSION = '0.17';
 }
 use Moose;
 # ABSTRACT: Storing hash values in Redis
@@ -28,7 +28,7 @@ sub get {
       endpoint => $endpoint,
       key => $key,
       storage_type => 'redis',
-      message => "Failed to fetch key ($key) from Redis ($endpoint): @_",
+      message => "Failed to fetch key ($key) from Redis ($endpoint): $@",
     });
   };
   return $hash;
@@ -42,8 +42,10 @@ sub set {
 
   my $r = $self->redis;
 
-  my $rv = eval {
-    $r->hmset($key, %$value_ref);
+  my $rv;
+  eval {
+    $rv = $r->hmset($key, %$value_ref);
+    1;
   } or do {
     my $endpoint = $self->redis_connect_str;
     ShardedKV::Error::WriteFail->throw({
@@ -51,7 +53,7 @@ sub set {
       key => $key,
       storage_type => 'redis',
       operation => 'set',
-      message => "Failed to store key ($key) to Redis ($endpoint): @_",
+      message => "Failed to store key ($key) to Redis ($endpoint): $@",
     });
   };
 
@@ -69,7 +71,7 @@ sub set {
         key => $key,
         storage_type => 'redis',
         operation => 'expire',
-        message => "Failed to store key ($key) to Redis ($endpoint): @_",
+        message => "Failed to store key ($key) to Redis ($endpoint): $@",
       });
     };
   }
@@ -90,7 +92,7 @@ ShardedKV::Storage::Redis::Hash - Storing hash values in Redis
 
 =head1 VERSION
 
-version 0.16
+version 0.17
 
 =head1 SYNOPSIS
 

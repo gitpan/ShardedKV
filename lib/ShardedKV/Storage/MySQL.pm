@@ -1,6 +1,6 @@
 package ShardedKV::Storage::MySQL;
 {
-  $ShardedKV::Storage::MySQL::VERSION = '0.16';
+  $ShardedKV::Storage::MySQL::VERSION = '0.17';
 }
 use Moose;
 # ABSTRACT: MySQL storage backend for ShardedKV
@@ -56,7 +56,7 @@ sub build_mysql_connection {
     ShardedKV::Error::ConnectFail->throw({
       endpoint => $endpoint,
       storage_type => 'mysql',
-      message => "Failed to make a connection to MySQL ($endpoint)",
+      message => "Failed to make a connection to MySQL ($endpoint): ${\$DBI::errstr}",
     });
     $logger->warn("Failed to get connection") if $logger;
   }
@@ -319,7 +319,7 @@ sub get {
       endpoint => $endpoint,
       key => $key,
       storage_type => 'mysql',
-      message => "Failed to fetch key ($key) from Redis ($endpoint): @_",
+      message => "Failed to fetch key ($key) from MySQL ($endpoint): $@, ${\$DBI::errstr} ",
     });
   };
   return ref($rv) ? $rv->[0] : undef;
@@ -341,7 +341,7 @@ sub set {
       endpoint => $endpoint,
       key => $key,
       storage_type => 'mysql',
-      message => "Failed to fetch key ($key) from Redis ($endpoint): @_",
+      message => "Failed to fetch key ($key) from MySQL ($endpoint): $@, ${\$DBI::errstr}",
     });
   };
   return $rv ? 1 : 0;
@@ -349,7 +349,19 @@ sub set {
 
 sub delete {
   my ($self, $key) = @_;
-  my $rv = $self->_run_sql('do', $self->_delete_query, undef, $key);
+  my $rv;
+  eval {
+    $rv = $self->_run_sql('do', $self->_delete_query, undef, $key);
+    1;
+  } or do {
+    my $endpoint = $self->mysql_endpoint->();
+    ShardedKV::Error::DeleteFail->throw({
+      endpoint => $endpoint,
+      key => $key,
+      storage_type => 'mysql',
+      message => "Failed to delete key ($key) to MySQL ($endpoint): $@, ${\$DBI::errstr}",
+    });
+  };
   return $rv ? 1 : 0;
 }
 
@@ -371,7 +383,7 @@ ShardedKV::Storage::MySQL - MySQL storage backend for ShardedKV
 
 =head1 VERSION
 
-version 0.16
+version 0.17
 
 =head1 SYNOPSIS
 

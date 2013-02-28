@@ -1,6 +1,6 @@
 package ShardedKV::HasLogger;
 {
-  $ShardedKV::HasLogger::VERSION = '0.16';
+  $ShardedKV::HasLogger::VERSION = '0.17';
 }
 use strict;
 use Moose::Role;
@@ -25,7 +25,7 @@ ShardedKV::HasLogger - The logging role for ShardedKV objects
 
 =head1 VERSION
 
-version 0.16
+version 0.17
 
 =head1 SYNOPSIS
 
