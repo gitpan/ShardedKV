@@ -1,6 +1,6 @@
 package ShardedKV::Storage::MySQL;
 {
-  $ShardedKV::Storage::MySQL::VERSION = '0.17';
+  $ShardedKV::Storage::MySQL::VERSION = '0.18';
 }
 use Moose;
 # ABSTRACT: MySQL storage backend for ShardedKV
@@ -373,8 +373,6 @@ sub reset_connection {
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
-
-
 =pod
 
 =head1 NAME
@@ -383,7 +381,7 @@ ShardedKV::Storage::MySQL - MySQL storage backend for ShardedKV
 
 =head1 VERSION
 
-version 0.17
+version 0.18
 
 =head1 SYNOPSIS
 
@@ -571,6 +569,10 @@ Steffen Mueller <smueller@cpan.org>
 
 Nick Perez <nperez@cpan.org>
 
+=item *
+
+Damian Gryski <dgryski@cpan.org>
+
 =back
 
 =head1 COPYRIGHT AND LICENSE
@@ -581,7 +583,6 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
 
 __END__
 

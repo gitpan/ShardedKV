@@ -1,6 +1,6 @@
 package ShardedKV::Continuum::StaticMapping;
 {
-  $ShardedKV::Continuum::StaticMapping::VERSION = '0.17';
+  $ShardedKV::Continuum::StaticMapping::VERSION = '0.18';
 }
 use Moose;
 # ABSTRACT: A continuum strategy based on a simple "significant bits" static mapping
@@ -161,7 +161,7 @@ sub _make_intspan {
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
-
+__END__
 
 =pod
 
@@ -171,7 +171,7 @@ ShardedKV::Continuum::StaticMapping - A continuum strategy based on a simple "si
 
 =head1 VERSION
 
-version 0.17
+version 0.18
 
 =head1 SYNOPSIS
 
@@ -256,6 +256,10 @@ Steffen Mueller <smueller@cpan.org>
 
 Nick Perez <nperez@cpan.org>
 
+=item *
+
+Damian Gryski <dgryski@cpan.org>
+
 =back
 
 =head1 COPYRIGHT AND LICENSE
@@ -266,7 +270,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
-

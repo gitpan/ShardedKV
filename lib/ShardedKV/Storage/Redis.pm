@@ -1,6 +1,6 @@
 package ShardedKV::Storage::Redis;
 {
-  $ShardedKV::Storage::Redis::VERSION = '0.17';
+  $ShardedKV::Storage::Redis::VERSION = '0.18';
 }
 use Moose;
 # ABSTRACT: Abstract base class for storing k/v pairs in Redis
@@ -17,6 +17,20 @@ has 'redis_connect_str' => (
   is => 'ro',
   isa => 'Str',
   required => 1,
+);
+
+
+has 'redis_retry_every' => (
+  is => 'ro',
+  isa => 'Num',
+  default => 500,
+);
+
+
+has 'redis_reconnect_timeout' => (
+  is => 'ro',
+  isa => 'Num',
+  default => 0,
 );
 
 
@@ -59,6 +73,8 @@ sub _make_connection {
       Redis->new( # dies if it can't connect!
       server => $endpoint,
       encoding => undef, # no automatic utf8 encoding for performance
+      every => $self->redis_retry_every,
+      reconnect => $self->redis_reconnect_timeout,
     );
   } or do {
     ShardedKV::Error::ConnectFail->throw({
@@ -105,7 +121,7 @@ sub reset_connection {
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
-
+__END__
 
 =pod
 
@@ -115,7 +131,7 @@ ShardedKV::Storage::Redis - Abstract base class for storing k/v pairs in Redis
 
 =head1 VERSION
 
-version 0.17
+version 0.18
 
 =head1 SYNOPSIS
 
@@ -135,6 +151,14 @@ storages for distinct Redis value types.
 
 A hostname:port string pointing at the Redis for this shard.
 Required.
+
+=head2 redis_retry_every
+
+The amount of time the C<Redis> object should wait between reconnect attempts, in milliseconds.  Default 500.
+
+=head2 redis_reconnect_timeout
+
+If set, the amount of time the C<Redis> object should try reconnecting for, in seconds.  If 0, do not attempt to reconnect.
 
 =head2 redis
 
@@ -218,6 +242,10 @@ Steffen Mueller <smueller@cpan.org>
 
 Nick Perez <nperez@cpan.org>
 
+=item *
+
+Damian Gryski <dgryski@cpan.org>
+
 =back
 
 =head1 COPYRIGHT AND LICENSE
@@ -228,7 +256,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
-
