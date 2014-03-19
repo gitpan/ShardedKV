@@ -1,7 +1,5 @@
 package ShardedKV;
-{
-  $ShardedKV::VERSION = '0.18';
-}
+$ShardedKV::VERSION = '0.19';
 use Moose;
 # ABSTRACT: An interface to sharded key-value stores
 
@@ -193,7 +191,7 @@ ShardedKV - An interface to sharded key-value stores
 
 =head1 VERSION
 
-version 0.18
+version 0.19
 
 =head1 SYNOPSIS
 
@@ -228,10 +226,6 @@ version 0.18
   $skv->delete($key);
 
 =head1 DESCRIPTION
-
-B<This is experimental software. Interfaces and implementation are subject to
-change. If you are interested in using this in production, please get in touch
-to gauge the current state of stability.>
 
 This module implements an abstract interface to a sharded key-value store.
 The storage backends as well as the "continuum" are pluggable. "Continuum"
@@ -517,8 +511,8 @@ L<ShardedKV::Continuum::StaticMapping>
 
 =head1 ACKNLOWLEDGMENT
 
-This module was originally developed for booking.com.
-With approval from booking.com, this module was generalized
+This module was originally developed for Booking.com.
+With approval from Booking.com, this module was generalized
 and put on CPAN, for which the authors would like to express
 their gratitude.
 

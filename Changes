@@ -1,4 +1,17 @@
-Revision history for ShardedKV: 0.18
+Revision history for ShardedKV: 0.19
+
+0.19      2014-03-19 11:46:23UTC+0000 UTC
+
+  - This module is *no longer* considered experimental. It's been used
+    in production at Booking.com for a long time now without much
+    issue.
+
+  - Several minor bugfixes like "use"-ing a module that might be used
+    for exceptions, fixing some exception logic.
+
+  - Try to deal with Redis clients that have gone away for whatever
+    reason (likely due to errors) by resetting the Redis connection on
+    errors.
 
 0.18      2013-05-28 17:35:01 Europe/Amsterdam
 

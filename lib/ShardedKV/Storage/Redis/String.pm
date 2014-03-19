@@ -1,7 +1,5 @@
 package ShardedKV::Storage::Redis::String;
-{
-  $ShardedKV::Storage::Redis::String::VERSION = '0.18';
-}
+$ShardedKV::Storage::Redis::String::VERSION = '0.19';
 use Moose;
 # ABSTRACT: Storing simple string values in Redis
 use Encode;
@@ -22,12 +20,14 @@ sub get {
     }
     1;
   } or do {
+    my $error = $@ || "Zombie Error";
     my $endpoint = $self->redis_connect_str;
+    $self->reset_connection;
     ShardedKV::Error::ReadFail->throw({
       endpoint => $endpoint,
       key => $key,
       storage_type => 'redis',
-      message => "Failed to fetch key ($key) from Redis ($endpoint): $@",
+      message => "Failed to fetch key ($key) from Redis ($endpoint): $error",
     });
   };
   
@@ -48,13 +48,15 @@ sub set {
     $rv = $r->set($key, $$value_ref);
     1;
   } or do {
+    my $error = $@ || "Zombie Error";
     my $endpoint = $self->redis_connect_str;
+    $self->reset_connection;
     ShardedKV::Error::WriteFail->throw({
       endpoint => $endpoint,
       key => $key,
       storage_type => 'redis',
       operation => 'set',
-      message => "Failed to store key ($key) to Redis ($endpoint): $@",
+      message => "Failed to store key ($key) to Redis ($endpoint): $error",
     });
   };
 
@@ -66,13 +68,15 @@ sub set {
       );
       1;
     } or do {
+      my $error = $@ || "Zombie Error";
       my $endpoint = $self->redis_connect_str;
+      $self->reset_connection;
       ShardedKV::Error::WriteFail->throw({
         endpoint => $endpoint,
         key => $key,
         storage_type => 'redis',
         operation => 'expire',
-        message => "Failed to store key ($key) to Redis ($endpoint): $@",
+        message => "Failed to store key ($key) to Redis ($endpoint): $error",
       });
     };
   }
@@ -91,7 +95,7 @@ ShardedKV::Storage::Redis::String - Storing simple string values in Redis
 
 =head1 VERSION
 
-version 0.18
+version 0.19
 
 =head1 SYNOPSIS
 

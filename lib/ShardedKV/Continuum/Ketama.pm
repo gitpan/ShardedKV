@@ -1,7 +1,5 @@
 package ShardedKV::Continuum::Ketama;
-{
-  $ShardedKV::Continuum::Ketama::VERSION = '0.18';
-}
+$ShardedKV::Continuum::Ketama::VERSION = '0.19';
 use Moose;
 # ABSTRACT: Continuum implementation based on ketama consistent hashing
 use Algorithm::ConsistentHash::Ketama;
@@ -52,7 +50,7 @@ sub extend {
   foreach my $elem (@$spec) {
     Carp::croak("Ketama spec must be an Array of Arrays, each inner record "
                 . "holding key and weight! This particular record is not an array or does not hold two elements")
-      if not ref($elem) eq 'ARRAY' and @$elem == 2;
+      if ref($elem) ne 'ARRAY' or @$elem != 2;
     $ketama->add_bucket(@$elem);
   }
 }
@@ -87,7 +85,7 @@ sub _make_ketama {
   foreach my $elem (@$spec) {
     Carp::croak("Ketama spec must be an Array of Arrays, each inner record "
                 . "holding key and weight! This particular record is not an array or does not hold two elements")
-      if not ref($elem) eq 'ARRAY' and @$elem == 2;
+      if ref($elem) ne 'ARRAY' or @$elem != 2;
     $ketama->add_bucket(@$elem);
   }
   return $ketama;
@@ -106,7 +104,7 @@ ShardedKV::Continuum::Ketama - Continuum implementation based on ketama consiste
 
 =head1 VERSION
 
-version 0.18
+version 0.19
 
 =head1 SYNOPSIS
 

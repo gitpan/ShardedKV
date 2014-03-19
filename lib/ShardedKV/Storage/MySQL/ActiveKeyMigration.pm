@@ -1,7 +1,5 @@
 package ShardedKV::Storage::MySQL::ActiveKeyMigration;
-{
-  $ShardedKV::Storage::MySQL::ActiveKeyMigration::VERSION = '0.18';
-}
+$ShardedKV::Storage::MySQL::ActiveKeyMigration::VERSION = '0.19';
 use strict;
 use warnings;
 # ABSTRACT: Simple-minded active key migration for the MySQL storage back-end
@@ -132,7 +130,7 @@ ShardedKV::Storage::MySQL::ActiveKeyMigration - Simple-minded active key migrati
 
 =head1 VERSION
 
-version 0.18
+version 0.19
 
 =head1 DESCRIPTION
 

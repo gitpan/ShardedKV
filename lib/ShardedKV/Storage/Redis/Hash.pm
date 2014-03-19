@@ -1,7 +1,5 @@
 package ShardedKV::Storage::Redis::Hash;
-{
-  $ShardedKV::Storage::Redis::Hash::VERSION = '0.18';
-}
+$ShardedKV::Storage::Redis::Hash::VERSION = '0.19';
 use Moose;
 # ABSTRACT: Storing hash values in Redis
 use Encode;
@@ -17,18 +15,26 @@ sub get {
   my $redis = $self->redis;
   my $hash;
   eval {
-    my %foo = $redis->hgetall($key);
+    my @foo = $redis->hgetall($key);
+    unless (@foo % 2 == 0) {
+      require Data::Dumper;
+      die sprintf "PANIC: Should get an even number of keys from hgetall(%s). Got <%s>",
+          $key, Data::Dumper->new(\@foo)->Useqq(1)->Terse(1)->Indent(1)->Dump;
+    }
+    my %foo = @foo;
     if(keys %foo) {
       $hash = \%foo;
     }
     1;
   } or do {
+    my $error = $@ || "Zombie Error";
     my $endpoint = $self->redis_connect_str;
+    $self->reset_connection;
     ShardedKV::Error::ReadFail->throw({
       endpoint => $endpoint,
       key => $key,
       storage_type => 'redis',
-      message => "Failed to fetch key ($key) from Redis ($endpoint): $@",
+      message => "Failed to fetch key ($key) from Redis ($endpoint): $error",
     });
   };
   return $hash;
@@ -47,13 +53,15 @@ sub set {
     $rv = $r->hmset($key, %$value_ref);
     1;
   } or do {
+    my $error = $@ || "Zombie Error";
     my $endpoint = $self->redis_connect_str;
+    $self->reset_connection;
     ShardedKV::Error::WriteFail->throw({
       endpoint => $endpoint,
       key => $key,
       storage_type => 'redis',
       operation => 'set',
-      message => "Failed to store key ($key) to Redis ($endpoint): $@",
+      message => "Failed to store key ($key) to Redis ($endpoint): $error",
     });
   };
 
@@ -65,13 +73,15 @@ sub set {
       );
       1;
     } or do {
+      my $error = $@ || "Zombie Error";
       my $endpoint = $self->redis_connect_str;
+      $self->reset_connection;
       ShardedKV::Error::WriteFail->throw({
         endpoint => $endpoint,
         key => $key,
         storage_type => 'redis',
         operation => 'expire',
-        message => "Failed to store key ($key) to Redis ($endpoint): $@",
+        message => "Failed to store key ($key) to Redis ($endpoint): $error",
       });
     };
   }
@@ -90,7 +100,7 @@ ShardedKV::Storage::Redis::Hash - Storing hash values in Redis
 
 =head1 VERSION
 
-version 0.18
+version 0.19
 
 =head1 SYNOPSIS
 
