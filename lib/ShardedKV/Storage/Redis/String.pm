@@ -1,5 +1,5 @@
 package ShardedKV::Storage::Redis::String;
-$ShardedKV::Storage::Redis::String::VERSION = '0.19';
+$ShardedKV::Storage::Redis::String::VERSION = '0.20';
 use Moose;
 # ABSTRACT: Storing simple string values in Redis
 use Encode;
@@ -95,7 +95,7 @@ ShardedKV::Storage::Redis::String - Storing simple string values in Redis
 
 =head1 VERSION
 
-version 0.19
+version 0.20
 
 =head1 SYNOPSIS
 

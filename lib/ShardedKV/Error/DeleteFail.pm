@@ -1,5 +1,5 @@
 package ShardedKV::Error::DeleteFail;
-$ShardedKV::Error::DeleteFail::VERSION = '0.19';
+$ShardedKV::Error::DeleteFail::VERSION = '0.20';
 use Moose;
 extends 'ShardedKV::Error';
 
@@ -24,7 +24,7 @@ ShardedKV::Error::DeleteFail - Thrown when delete() fails on a storage backend
 
 =head1 VERSION
 
-version 0.19
+version 0.20
 
 =head1 DESCRIPTION
 

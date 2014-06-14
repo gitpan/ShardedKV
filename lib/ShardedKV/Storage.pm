@@ -1,5 +1,5 @@
 package ShardedKV::Storage;
-$ShardedKV::Storage::VERSION = '0.19';
+$ShardedKV::Storage::VERSION = '0.20';
 use Moose::Role;
 # ABSTRACT: Role for classes implementing storage backends
 
@@ -22,7 +22,7 @@ ShardedKV::Storage - Role for classes implementing storage backends
 
 =head1 VERSION
 
-version 0.19
+version 0.20
 
 =head1 SYNOPSIS
 
